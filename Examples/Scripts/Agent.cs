@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
+#if UNITY_5_5_OR_NEWER
 using UnityEngine.AI;
+#endif
 
 public class Agent : MonoBehaviour
 {
@@ -10,7 +12,7 @@ public class Agent : MonoBehaviour
 
 	private void Start ()
 	{
-		agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+		agent = GetComponent<NavMeshAgent>();
 		agent.updateRotation = false;
 
 		animator = GetComponent<Animator>();

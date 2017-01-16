@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
+#if UNITY_5_5_OR_NEWER
 using UnityEngine.AI;
+#endif
 using NodeEditorFramework;
 using System.Collections;
 
