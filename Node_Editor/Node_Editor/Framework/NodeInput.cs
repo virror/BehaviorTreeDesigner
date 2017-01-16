@@ -8,7 +8,7 @@ namespace NodeEditorFramework
 	/// <summary>
 	/// NodeInput accepts one connection to a NodeOutput by default
 	/// </summary>
-	public class NodeInput : NodeKnob
+	public partial class NodeInput : NodeKnob
 	{
 		// NodeKnob Members
 		protected override NodeSide defaultSide { get { return NodeSide.Left; } }
@@ -197,15 +197,11 @@ namespace NodeEditorFramework
 			}
 			connection = output;
 			output.connections.Add (this);
-
-			if (!output.body.calculated)
-				NodeEditor.RecalculateFrom (output.body);
-			else
-				NodeEditor.RecalculateFrom (body);
-			
 			output.body.OnAddOutputConnection (output);
 			body.OnAddInputConnection (this);
 			NodeEditorCallbacks.IssueOnAddConnection (this);
+
+			NodeEditor.curNodeCanvas.OnNodeChange (body);
 		}
 
 		/// <summary>
@@ -220,7 +216,7 @@ namespace NodeEditorFramework
 			connection.connections.Remove (this);
 			connection = null;
 
-			NodeEditor.RecalculateFrom (body);
+			NodeEditor.curNodeCanvas.OnNodeChange (body);
 		}
 
 

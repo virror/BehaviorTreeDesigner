@@ -5,8 +5,11 @@ using NodeEditorFramework.Utilities;
 
 namespace NodeEditorFramework 
 {
-	public static class NodeEditorGUI 
+	public static partial class NodeEditorGUI 
 	{
+		internal static string curEditorUser;
+		internal static bool isEditorWindow;
+
 		// static GUI settings, textures and styles
 		public static int knobSize = 16;
 
@@ -25,6 +28,8 @@ namespace NodeEditorFramework
 		public static GUIStyle nodeLabel;
 		public static GUIStyle nodeLabelBold;
 		public static GUIStyle nodeLabelSelected;
+		public static GUIStyle nodeLabelCentered;
+		public static GUIStyle nodeLabelBoldCentered;
 
 		public static GUIStyle nodeBox;
 		public static GUIStyle nodeBoxBold;
@@ -63,6 +68,12 @@ namespace NodeEditorFramework
 			// Selected Label
 			nodeLabelSelected = new GUIStyle (nodeLabel);
 			nodeLabelSelected.normal.background = RTEditorGUI.ColorToTex (1, NE_LightColor);
+			// Centered Label
+			nodeLabelCentered = new GUIStyle (nodeLabel);
+			nodeLabelCentered.alignment = TextAnchor.MiddleCenter;
+			// Centered Bold Label
+			nodeLabelBoldCentered = new GUIStyle (nodeLabelBold);
+			nodeLabelBoldCentered.alignment = TextAnchor.MiddleCenter;
 			// Bold Box
 			nodeBoxBold = new GUIStyle (nodeBox);
 			nodeBoxBold.fontStyle = FontStyle.Bold;
@@ -70,14 +81,17 @@ namespace NodeEditorFramework
 			return true;
 		}
 
-		public static void StartNodeGUI () 
+		public static void StartNodeGUI (string editorUser, bool IsEditorWindow) 
 		{
 			NodeEditor.checkInit(true);
+
+			curEditorUser = editorUser;
+			isEditorWindow = IsEditorWindow;
 
 			defaultSkin = GUI.skin;
 			if (nodeSkin != null)
 				GUI.skin = nodeSkin;
-			OverlayGUI.StartOverlayGUI ();
+			OverlayGUI.StartOverlayGUI (curEditorUser);
 		}
 
 		public static void EndNodeGUI () 
@@ -87,6 +101,9 @@ namespace NodeEditorFramework
 		}
 
 		#region Connection Drawing
+
+		// Curve parameters
+		public static float curveBaseDirection = 1.5f, curveBaseStart = 2f, curveDirectionScale = 0.004f;
 
 		/// <summary>
 		/// Draws a node connection from start to end, horizontally
@@ -120,6 +137,21 @@ namespace NodeEditorFramework
 			}
 			else if (drawMethod == ConnectionDrawMethod.StraightLine)
 				RTEditorGUI.DrawLine (startPos, endPos, col * Color.gray, null, 3);
+		}
+
+		/// <summary>
+		/// Optimises the bezier directions scale so that the bezier looks good in the specified position relation.
+		/// Only the magnitude of the directions are changed, not their direction!
+		/// </summary>
+		public static void OptimiseBezierDirections (Vector2 startPos, ref Vector2 startDir, Vector2 endPos, ref Vector2 endDir) 
+		{
+			Vector2 offset = (endPos - startPos) * curveDirectionScale;
+			float baseDir = Mathf.Min (offset.magnitude/curveBaseStart, 1) * curveBaseDirection;
+			Vector2 scale = new Vector2 (Mathf.Abs (offset.x) + baseDir, Mathf.Abs (offset.y) + baseDir);
+			// offset.x and offset.y linearly increase at scale of curveDirectionScale
+			// For 0 < offset.magnitude < curveBaseStart, baseDir linearly increases from 0 to curveBaseDirection. For offset.magnitude > curveBaseStart, baseDir = curveBaseDirection
+			startDir = Vector2.Scale(startDir.normalized, scale);
+			endDir = Vector2.Scale(endDir.normalized, scale);
 		}
 
 		/// <summary>

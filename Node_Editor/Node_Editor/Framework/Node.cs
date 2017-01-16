@@ -3,9 +3,11 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
+using NodeEditorFramework.Utilities;
+
 namespace NodeEditorFramework
 {
-	public abstract class Node : ScriptableObject
+	public abstract partial class Node : ScriptableObject
 	{
 		public Rect rect = new Rect ();
 		internal Vector2 contentOffset = Vector2.zero;
@@ -21,6 +23,10 @@ namespace NodeEditorFramework
 		[NonSerialized]
 		internal bool calculated = true;
 
+		public Color backgroundColor = Color.white;
+		private Color lastBGColor = Color.white;
+		private GUIStyle nodeBGStyle;
+
 		#region General
 
 		/// <summary>
@@ -28,9 +34,9 @@ namespace NodeEditorFramework
 		/// </summary>
 		protected internal void InitBase () 
 		{
-			NodeEditor.RecalculateFrom (this);
 			if (!NodeEditor.curNodeCanvas.nodes.Contains (this))
 				NodeEditor.curNodeCanvas.nodes.Add (this);
+			NodeEditor.curNodeCanvas.OnNodeChange (this);
 			#if UNITY_EDITOR
 			if (String.IsNullOrEmpty (name))
 				name = UnityEditor.ObjectNames.NicifyVariableName (GetID);
@@ -67,6 +73,7 @@ namespace NodeEditorFramework
 					DestroyImmediate (nodeKnobs[knobCnt], true);
 			}
 			DestroyImmediate (this, true);
+			NodeEditor.curNodeCanvas.Validate ();
 		}
 
 		/// <summary>
@@ -83,11 +90,19 @@ namespace NodeEditorFramework
 		/// </summary>
 		public static Node Create (string nodeID, Vector2 position, NodeOutput connectingOutput) 
 		{
+			if (!NodeCanvasManager.CheckCanvasCompability (nodeID, NodeEditor.curNodeCanvas))
+				throw new UnityException ("Cannot create Node with ID '" + nodeID + "' as it is not compatible with the current canavs type (" + NodeEditor.curNodeCanvas.GetType ().ToString () + ")!");
+			if (!NodeEditor.curNodeCanvas.CanAddNode (nodeID))
+				throw new UnityException ("Cannot create another Node with ID '" + nodeID + "' on the current canvas of type (" + NodeEditor.curNodeCanvas.GetType ().ToString () + ")!");
 			Node node = NodeTypes.getDefaultNode (nodeID);
 			if (node == null)
-				throw new UnityException ("Cannot create Node with id " + nodeID + " as no such Node type is registered!");
+				throw new UnityException ("Cannot create Node as ID '" + nodeID + "' is not registered!");
 
 			node = node.Create (position);
+
+			if(node == null)
+				return null;
+
 			node.InitBase ();
 
 			if (connectingOutput != null)
@@ -100,6 +115,7 @@ namespace NodeEditorFramework
 			}
 
 			NodeEditorCallbacks.IssueOnAddNode (node);
+			NodeEditor.curNodeCanvas.Validate ();
 
 			return node;
 		}
@@ -214,26 +230,30 @@ namespace NodeEditorFramework
 	    }
 #endif
 
-        /// <summary>
-        /// Draws the node frame and calls NodeGUI. Can be overridden to customize drawing.
-        /// </summary>
-        protected internal virtual void DrawNode () 
+		/// <summary>
+		/// Draws the node frame and calls NodeGUI. Can be overridden to customize drawing.
+		/// </summary>
+		protected internal virtual void DrawNode () 
 		{
+			AssureNodeBGStyle ();
+
 			// TODO: Node Editor Feature: Custom Windowing System
-			// Create a rect that is adjusted to the editor zoom
+			// Create a rect that is adjusted to the editor zoom and pixel perfect
 			Rect nodeRect = rect;
-			nodeRect.position += NodeEditor.curEditorState.zoomPanAdjust + NodeEditor.curEditorState.panOffset;
+			Vector2 pos = NodeEditor.curEditorState.zoomPanAdjust + NodeEditor.curEditorState.panOffset;
+			nodeRect.position = new Vector2((int)(nodeRect.x+pos.x), (int)(nodeRect.y+pos.y));
 			contentOffset = new Vector2 (0, 20);
 
 			// Create a headerRect out of the previous rect and draw it, marking the selected node as such by making the header bold
 			Rect headerRect = new Rect (nodeRect.x, nodeRect.y, nodeRect.width, contentOffset.y);
-			GUI.Label (headerRect, name, NodeEditor.curEditorState.selectedNode == this? NodeEditorGUI.nodeBoxBold : NodeEditorGUI.nodeBox);
+			GUI.Box (headerRect, GUIContent.none, nodeBGStyle);
+			GUI.Label (headerRect, name, NodeEditor.curEditorState.selectedNode == this? NodeEditorGUI.nodeLabelBoldCentered : NodeEditorGUI.nodeLabelCentered);
 
 			// Begin the body frame around the NodeGUI
 			Rect bodyRect = new Rect (nodeRect.x, nodeRect.y + contentOffset.y, nodeRect.width, nodeRect.height - contentOffset.y);
-			GUI.BeginGroup (bodyRect, GUI.skin.box);
+			GUI.BeginGroup (bodyRect, nodeBGStyle);
 			bodyRect.position = Vector2.zero;
-			GUILayout.BeginArea (bodyRect, GUI.skin.box);
+			GUILayout.BeginArea (bodyRect);
 			// Call NodeGUI
 			GUI.changed = false;
 			NodeGUI ();
@@ -269,14 +289,24 @@ namespace NodeEditorFramework
 				for (int conCnt = 0; conCnt < output.connections.Count; conCnt++) 
 				{
 					NodeInput input = output.connections [conCnt];
-					NodeEditorGUI.DrawConnection (startPos,
-													startDir,
-													input.GetGUIKnob ().center,
-													input.GetDirection (),
-													output.typeData.Color);
+					Vector2 endPos = input.GetGUIKnob ().center;
+					Vector2 endDir = input.GetDirection();
+					NodeEditorGUI.OptimiseBezierDirections (startPos, ref startDir, endPos, ref endDir);
+					NodeEditorGUI.DrawConnection (startPos, startDir, endPos, endDir, output.typeData.Color);
 				}
 			}
 		}
+
+		private void AssureNodeBGStyle ()
+		{
+			if (nodeBGStyle == null || nodeBGStyle.normal.background == null || lastBGColor != backgroundColor)
+			{
+				lastBGColor = backgroundColor;
+				nodeBGStyle = new GUIStyle (GUI.skin.box);
+				nodeBGStyle.normal.background = ResourceManager.GetTintedTexture ("Textures/NE_Box.png", backgroundColor);
+			}
+		}
+
 
 		#endregion
 		

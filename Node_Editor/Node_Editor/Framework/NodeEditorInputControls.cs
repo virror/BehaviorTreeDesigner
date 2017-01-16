@@ -21,7 +21,7 @@ namespace NodeEditorFramework
 			List<Node> displayedNodes = state.connectOutput != null? NodeTypes.getCompatibleNodes (state.connectOutput) : NodeTypes.nodes.Keys.ToList ();
 			foreach (Node compatibleNode in displayedNodes)
 			{
-				if (NodeCanvasManager.CheckCanvasCompability (compatibleNode, inputInfo.editorState.canvas.GetType ()))
+				if (NodeCanvasManager.CheckCanvasCompability (compatibleNode.GetID, inputInfo.editorState.canvas) && inputInfo.editorState.canvas.CanAddNode (compatibleNode.GetID))
 					canvasContextMenu.AddItem (new GUIContent ("Add " + NodeTypes.nodes[compatibleNode].adress), false, CreateNodeCallback, new NodeEditorInputInfo (compatibleNode.GetID, state));
 			}
 		}
@@ -58,7 +58,7 @@ namespace NodeEditorFramework
 		{
 			inputInfo.SetAsCurrentEnvironment ();
 			NodeEditorState state = inputInfo.editorState;
-			if (state.focusedNode != null) 
+			if (state.focusedNode != null && NodeEditor.curNodeCanvas.CanAddNode (state.focusedNode.GetID)) 
 			{ // Create new node of same type
 				Node duplicatedNode = Node.Create (state.focusedNode.GetID, NodeEditor.ScreenToCanvasSpace (inputInfo.inputPos), state.connectOutput);
 				state.selectedNode = state.focusedNode = duplicatedNode;
@@ -78,6 +78,8 @@ namespace NodeEditorFramework
 		[HotkeyAttribute(KeyCode.DownArrow, EventType.KeyDown)]
 		private static void KB_MoveNode(NodeEditorInputInfo inputInfo)
 		{
+			if (GUIUtility.keyboardControl > 0)
+				return;
 			NodeEditorState state = inputInfo.editorState;
 			if (state.selectedNode != null)
 			{ 
@@ -115,10 +117,7 @@ namespace NodeEditorFramework
 			if (inputInfo.inputEvent.button == 0 && state.focusedNode != null && state.focusedNode == state.selectedNode && state.focusedNodeKnob == null) 
 			{ // Clicked inside the selected Node, so start dragging it
 				state.dragNode = true;
-				state.dragStart = inputInfo.inputPos;
-				state.dragPos = state.focusedNode.rect.position; // Need this here because of snapping
-				state.dragOffset = Vector2.zero;
-				inputInfo.inputEvent.delta = Vector2.zero;
+				state.StartDrag ("node", inputInfo.inputPos, state.focusedNode.rect.position);
 			}
 		}
 
@@ -128,11 +127,10 @@ namespace NodeEditorFramework
 			NodeEditorState state = inputInfo.editorState;
 			if (state.dragNode) 
 			{ // If conditions apply, drag the selected node, else disable dragging
-				if (state.selectedNode != null && GUIUtility.hotControl == 0)
-				{ // Calculate new position for the dragged object
-					state.dragOffset = inputInfo.inputPos-state.dragStart;
-					state.selectedNode.rect.position = state.dragPos + state.dragOffset*state.zoom;
-					NodeEditorCallbacks.IssueOnMoveNode (state.selectedNode);
+				if (state.selectedNode != null && GUIUtility.hotControl == 0 && inputInfo.editorState.dragUserID == "node")
+				{ // Apply new position for the dragged node
+					state.UpdateDrag ("node", inputInfo.inputPos);
+					state.selectedNode.rect.position = state.dragObjectPos;
 					NodeEditor.RepaintClients ();
 				} 
 				else
@@ -144,6 +142,15 @@ namespace NodeEditorFramework
 		[EventHandlerAttribute (EventType.MouseUp)]
 		private static void HandleNodeDraggingEnd (NodeEditorInputInfo inputInfo) 
 		{
+			if (inputInfo.editorState.dragUserID == "node") 
+			{
+				Vector2 totalDrag = inputInfo.editorState.EndDrag ("node");
+				if (inputInfo.editorState.dragNode && inputInfo.editorState.selectedNode != null)
+				{
+					inputInfo.editorState.selectedNode.rect.position = totalDrag;
+					NodeEditorCallbacks.IssueOnMoveNode (inputInfo.editorState.selectedNode);
+				}
+			}
 			inputInfo.editorState.dragNode = false;
 		}
 
@@ -151,7 +158,7 @@ namespace NodeEditorFramework
 
 		#region Window Panning
 
-		[EventHandlerAttribute (EventType.MouseDown, 100)] // Priority over hundred to make it call after the GUI
+		[EventHandlerAttribute (EventType.MouseDown, 105)] // Priority over hundred to make it call after the GUI
 		private static void HandleWindowPanningStart (NodeEditorInputInfo inputInfo) 
 		{
 			if (GUIUtility.hotControl > 0)
@@ -161,8 +168,7 @@ namespace NodeEditorFramework
 			if ((inputInfo.inputEvent.button == 0 || inputInfo.inputEvent.button == 2) && state.focusedNode == null) 
 			{ // Left- or Middle clicked on the empty canvas -> Start panning
 				state.panWindow = true;
-				state.dragStart = inputInfo.inputPos;
-				state.dragOffset = Vector2.zero;
+				state.StartDrag ("window", inputInfo.inputPos, state.panOffset);
 			}
 		}
 
@@ -172,11 +178,10 @@ namespace NodeEditorFramework
 			NodeEditorState state = inputInfo.editorState;
 			if (state.panWindow) 
 			{ // Calculate change in panOffset
-				Vector2 panOffsetChange = state.dragOffset;
-				state.dragOffset = inputInfo.inputPos - state.dragStart;
-				panOffsetChange = (state.dragOffset - panOffsetChange) * state.zoom;
-				// Apply panOffsetChange to panOffset
-				state.panOffset += panOffsetChange;
+				if (inputInfo.editorState.dragUserID == "window")
+					state.panOffset += state.UpdateDrag ("window", inputInfo.inputPos);
+				else
+					state.panWindow = false;
 				NodeEditor.RepaintClients ();
 			}
 		}
@@ -185,6 +190,8 @@ namespace NodeEditorFramework
 		[EventHandlerAttribute (EventType.MouseUp)]
 		private static void HandleWindowPanningEnd (NodeEditorInputInfo inputInfo) 
 		{
+			if (inputInfo.editorState.dragUserID == "window")
+				inputInfo.editorState.panOffset = inputInfo.editorState.EndDrag ("window");
 			inputInfo.editorState.panWindow = false;
 		}
 
@@ -236,8 +243,9 @@ namespace NodeEditorFramework
 		[EventHandlerAttribute (EventType.ScrollWheel)]
 		private static void HandleZooming (NodeEditorInputInfo inputInfo) 
 		{
-			inputInfo.editorState.zoom = (float)Math.Round (Math.Min (2.0, Math.Max (0.6, inputInfo.editorState.zoom + inputInfo.inputEvent.delta.y / 15)), 2);
+			inputInfo.editorState.zoom = (float)Math.Round (Math.Min (4.0, Math.Max (0.6, inputInfo.editorState.zoom + inputInfo.inputEvent.delta.y / 15)), 2);
 			NodeEditor.RepaintClients ();
+			inputInfo.inputEvent.Use ();
 		}
 
 		#endregion
@@ -247,13 +255,19 @@ namespace NodeEditorFramework
 		[HotkeyAttribute (KeyCode.N, EventType.KeyDown)]
 		private static void HandleStartNavigating (NodeEditorInputInfo inputInfo) 
 		{
+			if (GUIUtility.keyboardControl > 0)
+				return;
 			inputInfo.editorState.navigate = true;
+			inputInfo.inputEvent.Use ();
 		}
 
 		[HotkeyAttribute (KeyCode.N, EventType.KeyUp)]
 		private static void HandleEndNavigating (NodeEditorInputInfo inputInfo) 
 		{
+			if (GUIUtility.keyboardControl > 0)
+				return;
 			inputInfo.editorState.navigate = false;
+			inputInfo.inputEvent.Use ();
 		}
 
 		#endregion
@@ -266,10 +280,15 @@ namespace NodeEditorFramework
 		{
 			NodeEditorState state = inputInfo.editorState;
 			if (state.selectedNode != null)
-			{ // Snap selected Node's position to multiples of 10
-				Vector2 pos = state.selectedNode.rect.position;
-				pos = new Vector2 (Mathf.RoundToInt (pos.x/10) * 10, Mathf.RoundToInt (pos.y/10) * 10);
-				state.selectedNode.rect.position = pos;
+			{ // Snap selected Node's position and the drag to multiples of 10
+				state.selectedNode.rect.x = Mathf.Round (state.selectedNode.rect.x/10) * 10;
+				state.selectedNode.rect.y = Mathf.Round (state.selectedNode.rect.y/10) * 10;
+				inputInfo.inputEvent.Use ();
+			}
+			if (state.activeGroup != null)
+			{
+				state.activeGroup.rect.x = Mathf.Round (state.activeGroup.rect.x/10) * 10;
+				state.activeGroup.rect.y = Mathf.Round (state.activeGroup.rect.y/10) * 10;
 				inputInfo.inputEvent.Use ();
 			}
 			NodeEditor.RepaintClients ();

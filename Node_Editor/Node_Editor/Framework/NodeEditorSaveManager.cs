@@ -11,7 +11,7 @@ namespace NodeEditorFramework
 	/// <summary>
 	/// Manager handling all save and load operations on NodeCanvases and NodeEditorStates of the Node Editor, both as assets and in the scene
 	/// </summary>
-	public static class NodeEditorSaveManager 
+	public static partial class NodeEditorSaveManager 
 	{
 		#region Scene Saving
 
@@ -41,29 +41,61 @@ namespace NodeEditorFramework
 		public static string[] GetSceneSaves ()
 		{ // Get the saveHolder, find the existing stored saves and return their names
 			FetchSceneSaveHolder ();
-			return sceneSaveHolder.GetComponents<NodeCanvasSceneSave> ().Select (((NodeCanvasSceneSave save) => save.savedNodeCanvas.name)).ToArray ();
+			return sceneSaveHolder.GetComponents<NodeCanvasSceneSave> ().Select (((NodeCanvasSceneSave save) => save.saveName)).ToArray ();
 		}
 
 		/// <summary>
 		/// Finds a scene save in the current scene with specified name or null if it does not exist
 		/// </summary>
-		private static NodeCanvasSceneSave FindSceneSave (string saveName)
+		internal static NodeCanvasSceneSave FindSceneSave (string saveName)
+		{
+			NodeCanvasSceneSave sceneSave = null;
+			if (sceneSaveHolder != null)
+			{
+				sceneSave = sceneSaveHolder.GetComponents<NodeCanvasSceneSave> ().ToList ().Find ((NodeCanvasSceneSave save) => save.saveName == saveName || (save.savedNodeCanvas != null && save.savedNodeCanvas.name == saveName));
+				if (sceneSave != null)
+					sceneSave.saveName = saveName;
+			}
+			return sceneSave;
+		}
+
+		/// <summary>
+		/// Finds a scene save in the current scene with specified name or null if it does not exist
+		/// </summary>
+		internal static NodeCanvasSceneSave FindOrCreateSceneSave (string saveName)
 		{
 			FetchSceneSaveHolder ();
-			return sceneSaveHolder.GetComponents<NodeCanvasSceneSave> ().ToList ().Find ((NodeCanvasSceneSave save) => save.savedNodeCanvas.name == saveName);
+			NodeCanvasSceneSave sceneSave = sceneSaveHolder.GetComponents<NodeCanvasSceneSave> ().ToList ().Find ((NodeCanvasSceneSave save) => save.saveName == saveName || save.savedNodeCanvas.name == saveName);
+			if (sceneSave == null)
+				sceneSave = sceneSaveHolder.AddComponent<NodeCanvasSceneSave> ();
+			sceneSave.saveName = saveName;
+			return sceneSave;
+		}
+
+		/// <summary>
+		/// Finds a scene save in the current scene with specified name or null if it does not exist
+		/// </summary>
+		internal static NodeCanvasSceneSave CreateSceneSave (string saveName)
+		{
+			FetchSceneSaveHolder ();
+			NodeCanvasSceneSave sceneSave = sceneSaveHolder.AddComponent<NodeCanvasSceneSave> ();
+			sceneSave.saveName = saveName;
+			return sceneSave;
 		}
 
 		/// <summary>
 		/// Saves the nodeCanvas in the current scene under the specified name along with the specified editorStates or, if specified, their working copies
 		/// If also stored as an asset, it will loose the reference to the asset first
 		/// </summary>
-		public static void SaveSceneNodeCanvas (string saveName, ref NodeCanvas nodeCanvas, bool createWorkingCopy)
+		public static void SaveSceneNodeCanvas (string saveName, ref NodeCanvas nodeCanvas, bool createWorkingCopy, bool safeOverwrite = true) 
 		{
 			if (string.IsNullOrEmpty (saveName))
 			{
 				Debug.LogError ("Cannot save Canvas to scene: No save name specified!");
 				return;
 			}
+
+			if (nodeCanvas.GetType () == typeof(NodeCanvas)) throw new UnityException ("Cannot save NodeCanvas: The NodeCanvas has no explicit type: '" + nodeCanvas.GetType ().ToString () + "'. Please convert it to a valid type!");
 
 			if (!nodeCanvas.livesInScene
 		#if UNITY_EDITOR // Make sure the canvas has no reference to an asset
@@ -74,24 +106,42 @@ namespace NodeEditorFramework
 				nodeCanvas = CreateWorkingCopy (nodeCanvas, true);
 			}
 			else
-				nodeCanvas.Validate ();
+				nodeCanvas.Validate (true);
 
 			nodeCanvas.livesInScene = true;
 			nodeCanvas.name = saveName;
 
-		#if UNITY_EDITOR
-			nodeCanvas.BeforeSavingCanvas();
-		#endif
+			nodeCanvas.OnBeforeSavingCanvas();
+
+			nodeCanvas.UpdateSource ("SCENE/" + saveName);
 
 			NodeCanvas savedCanvas = nodeCanvas;
 			// Preprocess canvas
 			ProcessCanvas (ref savedCanvas, createWorkingCopy);
 
 			// Get the saveHolder and store the canvas
-			NodeCanvasSceneSave sceneSave = FindSceneSave (saveName);
-			if (sceneSave == null)
-				sceneSave = sceneSaveHolder.AddComponent<NodeCanvasSceneSave> ();
+			NodeCanvasSceneSave sceneSave;
+		#if UNITY_EDITOR
+			if ((sceneSave = FindSceneSave (saveName)) != null && safeOverwrite) // OVERWRITE
+				OverwriteCanvas (ref sceneSave.savedNodeCanvas, savedCanvas);
+			else
+			{
+				if (sceneSave == null) 
+					sceneSave = CreateSceneSave (saveName);
+				sceneSave.savedNodeCanvas = savedCanvas;
+			}
+			if (!Application.isPlaying)
+			{
+			#if UNITY_5_3_OR_NEWER
+				UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty (UnityEngine.SceneManagement.SceneManager.GetActiveScene ());
+			#else
+				UnityEditor.EditorApplication.MarkSceneDirty ();
+			#endif
+			}
+		#else
+			sceneSave = FindOrCreateSceneSave (saveName);
 			sceneSave.savedNodeCanvas = savedCanvas;
+		#endif
 
 		#if UNITY_EDITOR
 			UnityEditor.EditorUtility.SetDirty (sceneSaveHolder);
@@ -110,21 +160,46 @@ namespace NodeEditorFramework
 			}
 
 			NodeCanvasSceneSave sceneSave = FindSceneSave (saveName);
-			if (sceneSave == null) // No such save file
+			if (sceneSave == null || sceneSave.savedNodeCanvas == null) // No such save file
 				return null;
 
 			// Extract the saved canvas and editorStates
 			NodeCanvas savedCanvas = sceneSave.savedNodeCanvas;
 			savedCanvas.livesInScene = true;
 
+			savedCanvas.UpdateSource ("SCENE/" + saveName);
+
 			// Postprocess the loaded canvas
 			ProcessCanvas (ref savedCanvas, createWorkingCopy);
 
-		#if UNITY_EDITOR
+			#if UNITY_EDITOR
 			UnityEditor.EditorUtility.SetDirty (sceneSaveHolder);
-		#endif
+			#endif
 
 			return savedCanvas;
+		}
+
+		/// <summary>
+		/// Deletes the nodeCanvas and it's editorState stored in the current scene under the specified name
+		/// </summary>
+		public static void DeleteSceneNodeCanvas (string saveName)
+		{
+			if (string.IsNullOrEmpty (saveName))
+			{
+				Debug.LogError ("Cannot delete Canvas from scene: No save name specified!");
+				return;
+			}
+
+			NodeCanvasSceneSave sceneSave = FindSceneSave (saveName);
+			if (sceneSave != null)
+			{
+		#if UNITY_EDITOR
+				Object.DestroyImmediate (sceneSave);
+		#else
+				Object.Destroy (sceneSave);
+		#endif
+				//Debug.Log ("Successfully deleted SceneSave " + saveName);
+			}
 		}
 
 		#endregion
@@ -134,35 +209,69 @@ namespace NodeEditorFramework
 		/// <summary>
 		/// Saves the the given NodeCanvas along with the given NodeEditorStates if specified as a new asset, optionally as working copies
 		/// </summary>
-		public static void SaveNodeCanvas (string path, NodeCanvas nodeCanvas, bool createWorkingCopy) 
+		public static void SaveNodeCanvas (string path, NodeCanvas nodeCanvas, bool createWorkingCopy, bool safeOverwrite = true) 
 		{
 		#if !UNITY_EDITOR
 			throw new System.NotImplementedException ();
-		#else
+		#endif
 
-			if (string.IsNullOrEmpty (path)) throw new UnityException ("Cannot save NodeCanvas: No spath specified to save the NodeCanvas " + (nodeCanvas != null? nodeCanvas.name : "") + " to!");
+			if (string.IsNullOrEmpty (path) ||!path.StartsWith ("Assets")) throw new UnityException ("Cannot save NodeCanvas: Invalid path specified: '" + path + "'!");
 			if (nodeCanvas == null) throw new UnityException ("Cannot save NodeCanvas: The specified NodeCanvas that should be saved to path " + path + " is null!");
+			if (nodeCanvas.GetType () == typeof(NodeCanvas)) throw new UnityException ("Cannot save NodeCanvas: The NodeCanvas has no explicit type: '" + nodeCanvas.GetType ().ToString () + "'. Please convert it to a valid type!");
 			if (nodeCanvas.livesInScene)
-				Debug.LogWarning ("Attempting to save scene canvas " + nodeCanvas.name + " to an asset, scene object references will be broken!" + (!createWorkingCopy? " No workingCopy is going to be created, so your scene save is broken, too!" : ""));
+				Debug.LogWarning ("Attempting to save scene canvas " + nodeCanvas.name + " to an asset, scene object references may be broken!" + (!createWorkingCopy? " No workingCopy is going to be created, so your scene save is broken, too!" : ""));
 		#if UNITY_EDITOR
 			if (!createWorkingCopy && UnityEditor.AssetDatabase.Contains (nodeCanvas) && UnityEditor.AssetDatabase.GetAssetPath (nodeCanvas) != path) { Debug.LogError ("Trying to create a duplicate save file for '" + nodeCanvas.name + "'! Forcing to create a working copy!"); createWorkingCopy = true; }
 		#endif
 
+			path = ResourceManager.PreparePath (path);
+
+			nodeCanvas.OnBeforeSavingCanvas ();
+
+			NodeCanvas canvasSave = nodeCanvas;
+
 		#if UNITY_EDITOR
-			nodeCanvas.BeforeSavingCanvas();
+			nodeCanvas.UpdateSource (path);
 
 			// Preprocess the canvas
 			ProcessCanvas (ref nodeCanvas, createWorkingCopy);
 			nodeCanvas.livesInScene = false;
 
-			// Write canvas and editorStates
-			UnityEditor.AssetDatabase.CreateAsset (nodeCanvas, path);
-			AddSubAssets (nodeCanvas.editorStates, nodeCanvas);
+			canvasSave = nodeCanvas;
+			NodeCanvas prevSave;
+			if (safeOverwrite && (prevSave = ResourceManager.LoadResource<NodeCanvas> (path)) != null && prevSave.GetType () == canvasSave.GetType ()) // OVERWRITE
+			{ // Delete contents of old save
+				for (int nodeCnt = 0; nodeCnt < prevSave.nodes.Count; nodeCnt++) 
+				{
+					Node node = prevSave.nodes[nodeCnt];
+					for (int knobCnt = 0; knobCnt < node.nodeKnobs.Count; knobCnt++)
+					{
+						if (node.nodeKnobs[knobCnt] != null)
+							Object.DestroyImmediate (node.nodeKnobs[knobCnt], true);
+					}
+					Object.DestroyImmediate (node, true);
+				}
+				for (int i = 0; i < prevSave.editorStates.Length; i++)
+				{
+					if (prevSave.editorStates[i] != null)
+						Object.DestroyImmediate (prevSave.editorStates[i], true);
+				}
+				// Overwrite main canvas
+				OverwriteCanvas (ref prevSave, nodeCanvas);
+				canvasSave = prevSave;
+			}
+			else
+			{ // Write main canvas
+				UnityEditor.AssetDatabase.CreateAsset (nodeCanvas, path);
+			}
+
+			// Write editorStates
+			AddSubAssets (nodeCanvas.editorStates, canvasSave);
 
 			// Write nodes + contents
 			foreach (Node node in nodeCanvas.nodes)
 			{ // Write node and additional scriptable objects
-				AddSubAsset (node, nodeCanvas);
+				AddSubAsset (node, canvasSave);
 				AddSubAssets (node.GetScriptableObjects (), node);
 				foreach (NodeKnob knob in node.nodeKnobs)
 				{ // Write knobs and their additional scriptable objects
@@ -171,15 +280,13 @@ namespace NodeEditorFramework
 				}
 			}
 
-			UnityEditor.AssetDatabase.SaveAssets ();
-			UnityEditor.AssetDatabase.Refresh ();
+			//UnityEditor.AssetDatabase.SaveAssets ();
+			//UnityEditor.AssetDatabase.Refresh ();
 		#else
 			// TODO: Node Editor: Need to implement ingame-saving (Resources, AsssetBundles, ... won't work)
 		#endif
 
-			NodeEditorCallbacks.IssueOnSaveCanvas (nodeCanvas);
-
-		#endif
+			NodeEditorCallbacks.IssueOnSaveCanvas (canvasSave);
 		}
 
 		/// <summary>
@@ -192,6 +299,10 @@ namespace NodeEditorFramework
 			// Load only the NodeCanvas from the save file
 			NodeCanvas nodeCanvas = ResourceManager.LoadResource<NodeCanvas> (path);
 			if (nodeCanvas == null) throw new UnityException ("Cannot Load NodeCanvas: The file at the specified path '" + path + "' is no valid save file as it does not contain a NodeCanvas!");
+
+			path = ResourceManager.PreparePath (path);
+
+			nodeCanvas.UpdateSource (path);
 
 		#if UNITY_EDITOR
 			if (!Application.isPlaying && (nodeCanvas.editorStates == null || nodeCanvas.editorStates.Length == 0))
@@ -258,50 +369,10 @@ namespace NodeEditorFramework
 			if (workingCopy)
 				canvas = CreateWorkingCopy (canvas, true);
 			else
-				canvas.Validate ();
+				canvas.Validate (true);
 		}
 
 		#endregion
-
-		#endregion
-
-		#region Compression
-
-
-		/// <summary>
-		/// Compresses the nodeCanvas, meaning it will remove duplicate references that are only for convenience
-		/// </summary>
-		/*public static void Compress (ref NodeCanvas nodeCanvas)
-		{
-			for (int nodeCnt = 0; nodeCnt < nodeCanvas.nodes.Count; nodeCnt++) 
-			{
-				Node node = nodeCanvas.nodes[nodeCnt];
-				node.Inputs = new List<NodeInput> ();
-				node.Outputs = new List<NodeOutput> ();
-			}
-		}*/
-
-
-		/// <summary>
-		/// Uncompresses the nodeCanvas, meaning it will restore duplicate references for convenience
-		/// </summary>
-		public static void Uncompress (ref NodeCanvas nodeCanvas)
-		{
-			for (int nodeCnt = 0; nodeCnt < nodeCanvas.nodes.Count; nodeCnt++) 
-			{
-				Node node = nodeCanvas.nodes[nodeCnt];
-				node.Inputs = new List<NodeInput> ();
-				node.Outputs = new List<NodeOutput> ();
-				for (int knobCnt = 0; knobCnt < node.nodeKnobs.Count; knobCnt++) 
-				{
-					NodeKnob knob = node.nodeKnobs[knobCnt];
-					if (knob is NodeInput)
-						node.Inputs.Add (knob as NodeInput);
-					else if (knob is NodeOutput) 
-						node.Outputs.Add (knob as NodeOutput);
-				}
-			}
-		}
 
 		#endregion
 
@@ -313,7 +384,7 @@ namespace NodeEditorFramework
 		/// </summary>
 		public static NodeCanvas CreateWorkingCopy (NodeCanvas nodeCanvas, bool editorStates) 
 		{
-			nodeCanvas.Validate ();
+			nodeCanvas.Validate (true);
 			nodeCanvas = Clone (nodeCanvas);
 
 			// Take each SO, make a clone of it and store both versions in the respective list
@@ -479,6 +550,24 @@ namespace NodeEditorFramework
 			}
 			state.name = stateName;
 			return state;
+		}
+
+		/// <summary>
+		/// Overwrites canvas with canvasData, so that all references to canvas will be remained, but both canvases are still seperate.
+		/// Only works in the editor!
+		/// </summary>
+		public static void OverwriteCanvas (ref NodeCanvas canvas, NodeCanvas canvasData)
+		{
+		#if UNITY_EDITOR
+			if (canvasData == null)
+				throw new System.ArgumentNullException ("Cannot overwrite canvas as data is null!");
+			if (canvas == null)
+				canvas = ScriptableObject.CreateInstance(canvasData.GetType ()) as NodeCanvas;
+			UnityEditor.EditorUtility.CopySerialized (canvasData, canvas);
+			canvas.name = canvasData.name;
+		#else
+			throw new System.NotSupportedException ("Cannot overwrite canvas in player!");
+		#endif
 		}
 
 		#endregion

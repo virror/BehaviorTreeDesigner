@@ -24,6 +24,7 @@ namespace NodeEditorFramework.Standard
 		private string sceneCanvasName = "";
 		private Rect loadSceneUIPos;
 		private Rect createCanvasUIPos;
+		private Rect convertCanvasUIPos;
 		private int sideWindowWidth = 400;
 
 		public Rect sideWindowRect { get { return new Rect (position.width - sideWindowWidth, 0, sideWindowWidth, position.height); } }
@@ -38,7 +39,7 @@ namespace NodeEditorFramework.Standard
 		public static NodeEditorWindow OpenNodeEditor () 
 		{
 			_editor = GetWindow<NodeEditorWindow>();
-			_editor.minSize = new Vector2(800, 600);
+			_editor.minSize = new Vector2(400, 200);
 			NodeEditor.ReInit (false);
 
 			Texture iconTexture = ResourceManager.LoadTexture (EditorGUIUtility.isProSkin? "Textures/Icon_Dark.png" : "Textures/Icon_Light.png");
@@ -80,6 +81,8 @@ namespace NodeEditorFramework.Standard
 			// Setup Cache
 			canvasCache = new NodeEditorUserCache(Path.GetDirectoryName(AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject (this))));
 			canvasCache.SetupCacheEvents();
+			if (canvasCache.nodeCanvas.GetType () == typeof(NodeCanvas))
+				ShowNotification(new GUIContent("The Canvas has no specific type. Please use the convert button to assign a type and re-save the canvas!"));
 		}
 
 	    private void NormalReInit()
@@ -89,10 +92,6 @@ namespace NodeEditorFramework.Standard
 
 		private void OnDestroy()
 		{
-			EditorUtility.SetDirty(canvasCache.nodeCanvas);
-			AssetDatabase.SaveAssets();
-			AssetDatabase.Refresh();
-
 			NodeEditor.ClientRepaints -= Repaint;
 
 			EditorLoadingControl.justLeftPlayMode -= NormalReInit;
@@ -124,7 +123,7 @@ namespace NodeEditorFramework.Standard
 		{            
 			// Initiation
 			NodeEditor.checkInit(true);
-			if (NodeEditor.InitiationError)
+			if (NodeEditor.InitiationError || canvasCache == null)
 			{
 				GUILayout.Label("Node Editor Initiation failed! Check console for more information!");
 				return;
@@ -138,7 +137,7 @@ namespace NodeEditorFramework.Standard
 //			Rect canvasRect = GUILayoutUtility.GetRect (600, 600);
 //			if (Event.current.type != EventType.Layout)
 //				mainEditorState.canvasRect = canvasRect;
-			NodeEditorGUI.StartNodeGUI ();
+			NodeEditorGUI.StartNodeGUI ("NodeEditorWindow", true);
 
 			// Perform drawing with error-handling
 			try
@@ -164,7 +163,8 @@ namespace NodeEditorFramework.Standard
 
 		private void DrawSideWindow()
 		{
-			GUILayout.Label (new GUIContent ("Node Editor (" + canvasCache.nodeCanvas.name + ")", "Opened Canvas path: " + canvasCache.openedCanvasPath), NodeEditorGUI.nodeLabelBold);
+			GUILayout.Label (new GUIContent ("" + canvasCache.nodeCanvas.saveName + " (" + (canvasCache.nodeCanvas.livesInScene? "Scene Save" : "Asset Save") + ")", "Opened Canvas path: " + canvasCache.nodeCanvas.savePath), NodeEditorGUI.nodeLabelBold);
+			GUILayout.Label ("Type: " + canvasCache.typeData.DisplayString + "/" + canvasCache.nodeCanvas.GetType ().Name + "");
 
 //			EditorGUILayout.ObjectField ("Loaded Canvas", canvasCache.nodeCanvas, typeof(NodeCanvas), false);
 //			EditorGUILayout.ObjectField ("Loaded State", canvasCache.editorState, typeof(NodeEditorState), false);
@@ -180,19 +180,51 @@ namespace NodeEditorFramework.Standard
 				Rect popupPos = GUILayoutUtility.GetLastRect();
 				createCanvasUIPos = new Rect(popupPos.x + 2, popupPos.yMax + 2, popupPos.width - 4, 0);
 			}
-
-			GUILayout.Space(6);
-
-			if (GUILayout.Button(new GUIContent("Save Canvas", "Saves the Canvas to a Canvas Save File in the Assets Folder")))
+			if (canvasCache.nodeCanvas.GetType () == typeof(NodeCanvas) && GUILayout.Button(new GUIContent("Convert Canvas", "Converts the current canvas to a new type.")))
 			{
-				string path = EditorUtility.SaveFilePanelInProject ("Save Node Canvas", "Node Canvas", "asset", "", NodeEditor.editorPath + "Resources/Saves/");
+				NodeEditorFramework.Utilities.GenericMenu menu = new NodeEditorFramework.Utilities.GenericMenu();
+				NodeCanvasManager.FillCanvasTypeMenu(ref menu, canvasCache.ConvertCanvasType);
+				menu.Show(convertCanvasUIPos.position, convertCanvasUIPos.width);
+			}
+			if (Event.current.type == EventType.Repaint)
+			{
+				Rect popupPos = GUILayoutUtility.GetLastRect();
+				convertCanvasUIPos = new Rect(popupPos.x + 2, popupPos.yMax + 2, popupPos.width - 4, 0);
+			}
+
+			if (GUILayout.Button(new GUIContent("Save Canvas", "Save the Canvas to the load location")))
+			{
+				string path = canvasCache.nodeCanvas.savePath;
+				if (!string.IsNullOrEmpty (path))
+				{
+					if (path.StartsWith ("SCENE/"))
+						canvasCache.SaveSceneNodeCanvas (path.Substring (6));
+					else
+						canvasCache.SaveNodeCanvas (path);
+				}
+				else
+					ShowNotification (new GUIContent ("No save location found. Use 'Save As'!"));
+			}
+
+			//GUILayout.Space(6);
+			GUILayout.Label ("Asset Saving", NodeEditorGUI.nodeLabel);
+
+			if (GUILayout.Button(new GUIContent("Save Canvas As", "Save the canvas as an asset")))
+			{
+				string panelPath = NodeEditor.editorPath + "Resources/Saves/";
+				if (canvasCache.nodeCanvas != null && !string.IsNullOrEmpty(canvasCache.nodeCanvas.savePath))
+					panelPath = canvasCache.nodeCanvas.savePath;
+				string path = EditorUtility.SaveFilePanelInProject ("Save Node Canvas", "Node Canvas", "asset", "", panelPath);
 				if (!string.IsNullOrEmpty (path))
 					canvasCache.SaveNodeCanvas (path);
 			}
 
-			if (GUILayout.Button(new GUIContent("Load Canvas", "Loads the Canvas from a Canvas Save File in the Assets Folder")))
+			if (GUILayout.Button(new GUIContent("Load Canvas", "Load the Canvas from an asset")))
 			{
-				string path = EditorUtility.OpenFilePanel("Load Node Canvas", NodeEditor.editorPath + "Resources/Saves/", "asset");
+				string panelPath = NodeEditor.editorPath + "Resources/Saves/";
+				if (canvasCache.nodeCanvas != null && !string.IsNullOrEmpty(canvasCache.nodeCanvas.savePath))
+					panelPath = canvasCache.nodeCanvas.savePath;
+				string path = EditorUtility.OpenFilePanel("Load Node Canvas", panelPath, "asset");
 				if (!path.Contains(Application.dataPath))
 				{
 					if (!string.IsNullOrEmpty(path))
@@ -200,17 +232,20 @@ namespace NodeEditorFramework.Standard
 				}
 				else
 					canvasCache.LoadNodeCanvas (path);
+				if (canvasCache.nodeCanvas.GetType () == typeof(NodeCanvas))
+					ShowNotification(new GUIContent("The Canvas has no specific type. Please use the convert button to assign a type and re-save the canvas!"));
 			}
 
-			GUILayout.Space(6);
+			//GUILayout.Space(6);
+			GUILayout.Label ("Scene Saving", NodeEditorGUI.nodeLabel);
 
 			GUILayout.BeginHorizontal ();
 			sceneCanvasName = GUILayout.TextField (sceneCanvasName, GUILayout.ExpandWidth (true));
-			if (GUILayout.Button (new GUIContent ("Save to Scene", "Saves the Canvas to the Scene"), GUILayout.ExpandWidth (false)))
+			if (GUILayout.Button (new GUIContent ("Save to Scene", "Save the canvas to the Scene"), GUILayout.ExpandWidth (false)))
 				canvasCache.SaveSceneNodeCanvas (sceneCanvasName);
 			GUILayout.EndHorizontal ();
 
-			if (GUILayout.Button (new GUIContent ("Load from Scene", "Loads the Canvas from the Scene"))) 
+			if (GUILayout.Button (new GUIContent ("Load from Scene", "Load the canvas from the Scene"))) 
 			{
 				NodeEditorFramework.Utilities.GenericMenu menu = new NodeEditorFramework.Utilities.GenericMenu();
 				foreach (string sceneSave in NodeEditorSaveManager.GetSceneSaves())
@@ -223,16 +258,22 @@ namespace NodeEditorFramework.Standard
 				loadSceneUIPos = new Rect (popupPos.x+2, popupPos.yMax+2, popupPos.width-4, 0);
 			}
 
-			GUILayout.Space (6);
+			//GUILayout.Space (6);
+			GUILayout.Label ("Utility/Debug", NodeEditorGUI.nodeLabel);
 
 			if (GUILayout.Button (new GUIContent ("Recalculate All", "Initiates complete recalculate. Usually does not need to be triggered manually.")))
-				NodeEditor.RecalculateAll (canvasCache.nodeCanvas);
+				canvasCache.nodeCanvas.TraverseAll ();
 
 			if (GUILayout.Button ("Force Re-Init"))
 				NodeEditor.ReInit (true);
 			
 			NodeEditorGUI.knobSize = EditorGUILayout.IntSlider (new GUIContent ("Handle Size", "The size of the Node Input/Output handles"), NodeEditorGUI.knobSize, 12, 20);
-			canvasCache.editorState.zoom = EditorGUILayout.Slider (new GUIContent ("Zoom", "Use the Mousewheel. Seriously."), canvasCache.editorState.zoom, 0.6f, 2);
+			//canvasCache.editorState.zoom = EditorGUILayout.Slider (new GUIContent ("Zoom", "Use the Mousewheel. Seriously."), canvasCache.editorState.zoom, 0.6f, 4);
+			NodeEditorUserCache.cacheIntervalSec = EditorGUILayout.IntSlider (new GUIContent ("Cache Interval (Sec)", "The interval in seconds the canvas is temporarily saved into the cache as a precaution for crashes."), NodeEditorUserCache.cacheIntervalSec, 30, 300);
+
+//			NodeEditorGUI.curveBaseDirection = EditorGUILayout.FloatField ("Curve Base Dir", NodeEditorGUI.curveBaseDirection);
+//			NodeEditorGUI.curveBaseStart = EditorGUILayout.FloatField ("Curve Base Start", NodeEditorGUI.curveBaseStart);
+//			NodeEditorGUI.curveDirectionScale = EditorGUILayout.FloatField ("Curve Dir Scale", NodeEditorGUI.curveDirectionScale);
 
 			if (canvasCache.editorState.selectedNode != null && Event.current.type != EventType.Ignore)
 				canvasCache.editorState.selectedNode.DrawNodePropertyEditor();
