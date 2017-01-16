@@ -23,7 +23,7 @@ namespace BehavorTreeDesigner
 			return node;
 		}
 
-		protected internal override void NodeGUI()
+		protected override void NodeGUI()
 		{
 			base.NodeGUI();
 			GUILayout.BeginHorizontal();
@@ -32,12 +32,12 @@ namespace BehavorTreeDesigner
 			GUILayout.EndHorizontal();
 		}
 
-		public override void Init(Hashtable data)
+		public override void Init(BehaviorBlackboard data)
 		{
-			
+			data.Add(guid.ToString(), 0);
 		}
 
-		public override NodeStatus Tick()
+		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
 			if(this.Outputs[0].connections.Count == 0)
 			{
@@ -47,13 +47,27 @@ namespace BehavorTreeDesigner
 
 			BaseBehaviorNode node = (BaseBehaviorNode)this.Outputs[0].connections[0].body;
 			NodeStatus status = NodeStatus.SUCCESS;
+			int rep = data.Get(guid.ToString());
 			
-			for(int i = 0; i < repNumber; i++)
+			status = node.Tick(data);
+
+			if(status == NodeStatus.RUNNING)
 			{
-				status = node.Tick();
-				if(status == NodeStatus.FAILURE)
-					return NodeStatus.FAILURE;
+				return status;
 			}
+
+			rep += 1;
+			
+			if(rep < repNumber)
+			{
+				status = NodeStatus.RUNNING;
+				data.Add(guid.ToString(), rep);
+			}
+			else
+			{
+				data.Add(guid.ToString(), 0);
+			}
+
 			return status;
 		}
 	}

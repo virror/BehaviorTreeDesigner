@@ -22,12 +22,7 @@ namespace BehavorTreeDesigner
 			return node;
 		}
 
-		public override void Init(Hashtable data)
-		{
-
-		}
-
-		public override NodeStatus Tick()
+		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
 			List<NodeOutput> nodes = this.Outputs;
 
@@ -36,7 +31,7 @@ namespace BehavorTreeDesigner
 				if(node.connections.Count == 0)
 					continue;
 					
-				NodeStatus childstatus = ((BaseBehaviorNode)(node.connections[0].body)).Tick();
+				NodeStatus childstatus = ((BaseBehaviorNode)(node.connections[0].body)).Tick(data);
 				if(childstatus != NodeStatus.FAILURE)
 				{
 					return childstatus;

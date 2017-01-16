@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 using System.Collections;
 using NodeEditorFramework;
 
@@ -11,9 +12,24 @@ namespace BehavorTreeDesigner
         protected string Id;
         [SerializeField]
         protected Texture tex;
+        [SerializeField]
+        protected Guid guid;
 
-        public abstract void Init( Hashtable data );
-        public abstract NodeStatus Tick();
+        public abstract NodeStatus Tick(BehaviorBlackboard data);
+
+        public virtual void Init(BehaviorBlackboard data)
+        {
+            List<NodeOutput> nodes = this.Outputs;
+
+			foreach(NodeOutput node in nodes)
+			{
+				if(node.connections.Count == 0)
+					continue;
+					
+				((BaseBehaviorNode)(node.connections[0].body)).Init(data);
+            }
+            guid = Guid.NewGuid();
+        }
 
         protected void Init(BaseBehaviorNode node)
         {
@@ -22,7 +38,7 @@ namespace BehavorTreeDesigner
             node.tex = (Texture)Resources.Load("BehavorIcons/" + node.Id);
         }
 
-        protected internal override void NodeGUI()
+        protected override void NodeGUI()
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();

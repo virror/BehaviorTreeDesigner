@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace BehavorTreeDesigner
 {
-	[Node(false, "Behavior/Debug/TrueFalse")]
+	[Node(false, "Behavior/Debug/FixedValue")]
 	public class FixedValue : BaseBehaviorNode
 	{
 		[SerializeField]
@@ -22,20 +22,15 @@ namespace BehavorTreeDesigner
 			return node;
 		}
 
-		protected internal override void NodeGUI()
+		protected override void NodeGUI()
 		{
 			base.NodeGUI();
 			nodeStatus = (NodeStatus)EditorGUILayout.EnumPopup(nodeStatus);
 		}
 
-		public override void Init(Hashtable data)
-		{
-
-		}
-
-		public override NodeStatus Tick()
+		public override NodeStatus Tick(BehaviorBlackboard data)
 		{	
 			return nodeStatus;
 		}
 	}
-} //>_
+}

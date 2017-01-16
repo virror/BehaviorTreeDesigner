@@ -9,6 +9,6 @@ NOTE: This asset is still in very early stages, it works but does not have a lot
 * In the Tree editor, click "New Canvas" and select "Behavior Canvas".
 * Now you can create behaviors by clicking right mouse button and placing nodes.
 * NOTE: You must have a "Root" and no connected nodes with a single output can have it empty.
-* Save the Behavior tree using the "Save Canvas" button.
+* Save the Behavior tree using the "Save Canvas" button in a "Resources" folder.
 * Add a empty GameObject to the scene and add a "Behavior Manager" script to it.
-* Assign your saved Behavior Tree to it and hit Play.
+* Add the path to the saved behavior tree and hit Play.
