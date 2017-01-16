@@ -4,54 +4,57 @@ using System.Collections;
 using UnityEngine.AI;
 #endif
 
-public class Agent : MonoBehaviour
+namespace BehavorTreeDesigner.Example
 {
-	protected NavMeshAgent agent;
-	protected Animator animator;
-	protected Locomotion locomotion;
-
-	private void Start ()
+	public class Agent : MonoBehaviour
 	{
-		agent = GetComponent<NavMeshAgent>();
-		agent.updateRotation = false;
+		protected NavMeshAgent agent;
+		protected Animator animator;
+		protected Locomotion locomotion;
 
-		animator = GetComponent<Animator>();
-		locomotion = new Locomotion(animator);
-	}
-
-	protected void SetupAgentLocomotion()
-	{
-		if (AgentDone())
+		private void Start ()
 		{
-			locomotion.Do(0, 0);
+			agent = GetComponent<NavMeshAgent>();
+			agent.updateRotation = false;
+
+			animator = GetComponent<Animator>();
+			locomotion = new Locomotion(animator);
 		}
-		else
+
+		protected void SetupAgentLocomotion()
 		{
-			float speed = agent.desiredVelocity.magnitude;
-			Vector3 velocity = Quaternion.Inverse(transform.rotation) * agent.desiredVelocity;
-			float angle = Mathf.Atan2(velocity.x, velocity.z) * 180.0f / 3.14159f;
-			locomotion.Do(speed, angle);
+			if (AgentDone())
+			{
+				locomotion.Do(0, 0);
+			}
+			else
+			{
+				float speed = agent.desiredVelocity.magnitude;
+				Vector3 velocity = Quaternion.Inverse(transform.rotation) * agent.desiredVelocity;
+				float angle = Mathf.Atan2(velocity.x, velocity.z) * 180.0f / 3.14159f;
+				locomotion.Do(speed, angle);
+			}
 		}
-	}
 
-    private void OnAnimatorMove()
-    {
-        agent.velocity = animator.deltaPosition / Time.deltaTime;
-		transform.rotation = animator.rootRotation;
-    }
+		private void OnAnimatorMove()
+		{
+			agent.velocity = animator.deltaPosition / Time.deltaTime;
+			transform.rotation = animator.rootRotation;
+		}
 
-	protected bool AgentDone()
-	{
-		return !agent.pathPending && AgentStopping();
-	}
+		protected bool AgentDone()
+		{
+			return !agent.pathPending && AgentStopping();
+		}
 
-	protected bool AgentStopping()
-	{
-		return agent.remainingDistance <= agent.stoppingDistance;
-	}
+		protected bool AgentStopping()
+		{
+			return agent.remainingDistance <= agent.stoppingDistance;
+		}
 
-	private void Update () 
-	{
-		SetupAgentLocomotion();
+		private void Update () 
+		{
+			SetupAgentLocomotion();
+		}
 	}
 }

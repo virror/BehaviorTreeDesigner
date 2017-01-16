@@ -2,7 +2,7 @@
 using NodeEditorFramework;
 using System.Collections;
 
-namespace BehavorTreeDesigner
+namespace BehavorTreeDesigner.Example
 {
 	[Node(false, "Behavior/Action/Shoot")]
 	public class Shoot : BaseBehaviorNode

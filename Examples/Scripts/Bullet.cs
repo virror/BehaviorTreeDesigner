@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+namespace BehavorTreeDesigner.Example
 {
-	private void Start ()
+	public class Bullet : MonoBehaviour
 	{
-		Destroy(gameObject, 2);
-	}
+		private void Start ()
+		{
+			Destroy(gameObject, 2);
+		}
 
-	private void Update()
-	{
-		transform.Translate(Vector3.forward * 10 * Time.deltaTime, Space.Self);
+		private void Update()
+		{
+			transform.Translate(Vector3.forward * 10 * Time.deltaTime, Space.Self);
+		}
 	}
 }

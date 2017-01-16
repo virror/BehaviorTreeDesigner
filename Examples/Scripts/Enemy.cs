@@ -2,20 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+namespace BehavorTreeDesigner.Example
 {
-	private int health = 3;
-	
-	private void OnTriggerEnter(Collider collider)
+	public class Enemy : MonoBehaviour
 	{
-		if(collider.name == "Bullet(Clone)")
+		private int health = 3;
+		
+		private void OnTriggerEnter(Collider collider)
 		{
-			health -= 1;
-			if(health == 0)
+			if(collider.name == "Bullet(Clone)")
 			{
-				Destroy(gameObject);
+				health -= 1;
+				if(health == 0)
+				{
+					Destroy(gameObject);
+				}
+				Destroy(collider.gameObject);
 			}
-			Destroy(collider.gameObject);
 		}
 	}
 }
