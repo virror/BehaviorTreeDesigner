@@ -1,6 +1,5 @@
 ### BehaviorTreeDesigner
 An asset to help you design great ai.
-NOTE: This asset is still in very early stages, it works but does not have a lot of features built in yet.
 
 ## Getting Started
 * Add this repository to your projects Assets folder.
@@ -10,4 +9,4 @@ NOTE: This asset is still in very early stages, it works but does not have a lot
 * NOTE: You must have a "Root" and no connected nodes with a single output can have it empty.
 * Save the Behavior tree using the "Save Canvas" button in a "Resources" folder.
 * Add a empty GameObject to the scene and add a "Behavior Manager" script to it.
-* Add the path to the saved behavior tree, add the agent reference and hit Play.
+* Add the behavior tree reference and the agent reference and hit Play.

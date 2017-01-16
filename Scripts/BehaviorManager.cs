@@ -4,7 +4,7 @@ using BehavorTreeDesigner;
 
 public class BehaviorManager : MonoBehaviour
 {
-	public string path;
+	public BehaviorCanvas behaviorTree;
 	public float tickTime = 0.1f;
 	public Transform agent;
 
@@ -13,22 +13,20 @@ public class BehaviorManager : MonoBehaviour
 
 	private void Start ()
 	{
-		string response = IsValid();
-		if(response != "")
+		if(behaviorTree == null)
 		{
-			Debug.LogError(response);
+			Debug.LogError("Behavor Tree Designer\nNo behavior assigned!");
+			return;
+		}
+		if(agent == null)
+		{
+			Debug.LogError("Behavor Tree Designer\nNo agent assigned!");
 			return;
 		}
 
-		BehaviorCanvas behavior = Resources.Load<BehaviorCanvas>(path);
-		if(behavior == null)
-		{
-			Debug.LogError("Behavor Tree Designer\nNo valid path!");
-			return;
-		}
 		data = new BehaviorBlackboard();
 		data.Add<Transform>("Agent", agent);
-		rootNode = behavior.GetRootNode();
+		rootNode = behaviorTree.GetRootNode();
 		rootNode.Init(data);
 		InvokeRepeating("DoTick", 0, tickTime);
 	}
@@ -36,21 +34,5 @@ public class BehaviorManager : MonoBehaviour
 	private void DoTick ()
 	{
 		rootNode.Tick(data);
-	}
-
-	private string IsValid()
-	{
-		if(path == "")
-		{
-			return "Behavor Tree Designer\nNo path given!";
-		}
-		else if(agent == null)
-		{
-			return "Behavor Tree Designer\nNo agent assigned!";
-		}
-		else
-		{
-			return "";
-		}
 	}
 }
