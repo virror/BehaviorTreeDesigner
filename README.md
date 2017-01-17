@@ -27,5 +27,5 @@ It can be found in BehaviorTreeDesigner\Examples\Scenes\.
 
 ## License
 
-Code released under the [MIT License]LICENSE).
+Code released under the [MIT License](LICENSE).
 
