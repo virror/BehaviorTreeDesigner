@@ -1,6 +1,7 @@
 ### BehaviorTreeDesigner
-An asset to help you design great ai.
+An asset to help you design great ai.  
 Requires Unity 5.4 or higher.
+Made possible thanx to the awesome [Node_Editor](https://github.com/Baste-RainGames/Node_Editor) by Baste-RainGames, thank you : )
 
 ## Getting Started
 
@@ -21,7 +22,7 @@ documentation for this GitHub repository.
 
 ## Examples
 
-There is one example scene set up that shows a very basic ai in action.
+There is one example scene set up that shows a very basic ai in action.  
 It can be found in BehaviorTreeDesigner\Examples\Scenes\.
 
 ## License
