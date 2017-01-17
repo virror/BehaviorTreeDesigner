@@ -26,6 +26,5 @@ It can be found in BehaviorTreeDesigner\Examples\Scenes\.
 
 ## License
 
-Code released under the [MIT License].
+Code released under the [MIT License]LICENSE).
 
-[MIT License]: https://github.com/thestonefox/SteamVR_Unity_Toolkit/blob/master/LICENSE
