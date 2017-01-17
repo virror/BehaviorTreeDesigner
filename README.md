@@ -1,5 +1,6 @@
 ### BehaviorTreeDesigner
 An asset to help you design great ai.
+Requires Unity 5.4 or higher.
 
 ## Getting Started
 
