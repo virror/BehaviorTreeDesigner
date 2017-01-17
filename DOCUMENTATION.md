@@ -7,8 +7,8 @@ This file provides documentation on how to use the included prefabs and scripts.
 * [Example scene](#example-scene)
 * [Custom nodes](#custom-nodes)
  * [General](#general)
- * [Decorators](#decorator)
- * [Composites](#composits)
+ * [Decorators](#decorators)
+ * [Composites](#composites)
  * [Actions](#actions)
  * [Blackboard](#blackboard)
 
@@ -38,7 +38,7 @@ returns to the root node. There are four basic types of nodes and those are:
   moving the agent around.
 
 All nodes currently included and their description can be found here:
-[IncludedNodes.md]
+[Included nodes](IncludedNodes.md)
 
 ## Example scene
 

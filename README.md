@@ -16,7 +16,7 @@ Requires Unity 5.4 or higher.
 ## Documentation
 
 The documentation for the project can be found within this
-repository in [DOCUMENTATION.md] which includes the up to date
+repository in [Documentation](DOCUMENTATION.md) which includes the up to date
 documentation for this GitHub repository.
 
 ## Examples
@@ -27,3 +27,5 @@ It can be found in BehaviorTreeDesigner\Examples\Scenes\.
 ## License
 
 Code released under the [MIT License].
+
+[MIT License]: https://github.com/thestonefox/SteamVR_Unity_Toolkit/blob/master/LICENSE
