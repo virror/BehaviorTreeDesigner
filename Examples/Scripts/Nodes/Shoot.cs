@@ -7,6 +7,8 @@ namespace BehavorTreeDesigner.Example
 	[Node(false, "Behavior/Action/Shoot")]
 	public class Shoot : BaseBehaviorNode
 	{
+		private GameObject bullet;
+
 		public override Node Create(Vector2 pos)
 		{
 			Shoot node = CreateInstance<Shoot>();
@@ -18,10 +20,15 @@ namespace BehavorTreeDesigner.Example
 			return node;
 		}
 
+		public override void Init(BehaviorBlackboard data)
+		{
+			base.Init(data);
+			bullet = Resources.Load<GameObject>("Bullet");
+		}
+
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
-			Transform agent = data.Get<Transform>("Agent");
-			GameObject bullet = Resources.Load<GameObject>("Bullet");
+			Transform agent = data.GetClass<Transform>("Agent");
 			GameObject.Instantiate(bullet, agent.position + new Vector3(0, 1, 0), agent.rotation);
 			return NodeStatus.SUCCESS;
 		}

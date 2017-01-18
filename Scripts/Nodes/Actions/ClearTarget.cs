@@ -20,7 +20,7 @@ namespace BehavorTreeDesigner
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
-			data.Add<Transform>("Target", null);
+			data.AddClass<Transform>("Target", null);
 			return NodeStatus.SUCCESS;
 		}
 	}

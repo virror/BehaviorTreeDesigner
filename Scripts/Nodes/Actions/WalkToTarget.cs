@@ -33,8 +33,8 @@ namespace BehavorTreeDesigner
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
-			Transform player = data.Get<Transform>("Agent");
-			Vector3 enemy = data.Get<Transform>("Target").position;
+			Transform player = data.GetClass<Transform>("Agent");
+			Vector3 enemy = data.GetClass<Transform>("Target").position;
 			NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
 			Vector3 playerPos = player.position;
 			agent.stoppingDistance = stopDist;

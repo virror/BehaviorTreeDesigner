@@ -40,7 +40,7 @@ namespace BehavorTreeDesigner
 				return NodeStatus.FAILURE;
 			}
 
-			agent = data.Get<Transform>("Agent");
+			agent = data.GetClass<Transform>("Agent");
 			minDist = Vector3.Distance(agent.position, objects[0].transform.position);
 			closest = objects[0].transform;
 
@@ -53,8 +53,8 @@ namespace BehavorTreeDesigner
 					closest = objects[i].transform;
 				}
 			}
-
-			data.Add<Transform>("Target", closest);
+			
+			data.AddClass<Transform>("Target", closest);
 			return NodeStatus.SUCCESS;
 		}
 	}

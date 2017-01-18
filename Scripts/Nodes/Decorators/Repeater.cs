@@ -34,7 +34,8 @@ namespace BehavorTreeDesigner
 
 		public override void Init(BehaviorBlackboard data)
 		{
-			data.Add(guid.ToString(), 0);
+			base.Init(data);
+			data.AddInt(guid.ToString(), 0);
 		}
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
@@ -47,7 +48,7 @@ namespace BehavorTreeDesigner
 
 			BaseBehaviorNode node = (BaseBehaviorNode)this.Outputs[0].connections[0].body;
 			NodeStatus status = NodeStatus.SUCCESS;
-			int rep = data.Get(guid.ToString());
+			int rep = data.GetInt(guid.ToString());
 			
 			status = node.Tick(data);
 
@@ -61,11 +62,11 @@ namespace BehavorTreeDesigner
 			if(rep < repNumber)
 			{
 				status = NodeStatus.RUNNING;
-				data.Add(guid.ToString(), rep);
+				data.AddInt(guid.ToString(), rep);
 			}
 			else
 			{
-				data.Add(guid.ToString(), 0);
+				data.AddInt(guid.ToString(), 0);
 			}
 
 			return status;
