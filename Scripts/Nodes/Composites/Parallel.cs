@@ -26,16 +26,24 @@ namespace BehavorTreeDesigner
 		{
 			List<NodeOutput> nodes = this.Outputs;
 			NodeStatus[] childstatus = new NodeStatus[nodes.Count];
+			int count = 0;
+			bool running = false;
+			bool fail = false;
 
 			for(int i = 0; i < nodes.Count; i++)
 			{
 				if(nodes[i].connections.Count == 0)
 					continue;
 
+				count ++;
 				childstatus[i] = ((BaseBehaviorNode)(nodes[i].connections[0].body)).Tick(data);
 			}
-			bool running = false;
-			bool fail = false;
+
+			if(count == 0)
+			{
+				return NodeStatus.ERROR;
+			}
+
 			foreach(NodeStatus status in childstatus)
 			{
 				if(status == NodeStatus.ERROR)

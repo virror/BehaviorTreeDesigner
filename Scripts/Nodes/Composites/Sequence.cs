@@ -25,6 +25,7 @@ namespace BehavorTreeDesigner
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
 			List<NodeOutput> nodes = this.Outputs;
+			int count = 0;
 
 			foreach(NodeOutput node in nodes)
 			{
@@ -32,11 +33,18 @@ namespace BehavorTreeDesigner
 					continue;
 					
 				NodeStatus childstatus = ((BaseBehaviorNode)(node.connections[0].body)).Tick(data);
+				count ++;
 				if(childstatus != NodeStatus.SUCCESS)
 				{
 					return childstatus;
 				}
 			}
+
+			if(count == 0)
+			{
+				return NodeStatus.ERROR;
+			}
+
 			return NodeStatus.SUCCESS;
 		}
 	}
