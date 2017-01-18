@@ -13,7 +13,10 @@ Here is a complete list of all the included nodes and a short description.
 
 * Parallel:
   > Runs all children simultaneously.  
-    Returns SUCCESS if all children is successful, otherwise FAILURE. 
+    Returns SUCCESS if all children is successful, otherwise FAILURE.
+
+* Random:
+  > Runs one random node and returns it status.
 
 ## Debug
 * FixedValue:
@@ -31,6 +34,10 @@ Here is a complete list of all the included nodes and a short description.
   > Repeats the child node n times always returning after one tick.  
   	Returns RUNNING during the ticks its repeating, after its done, it returns  
 	last childs result.
+
+* Wait:
+  > Waits a certain number of seconds until the child is allowed to run.
+    Returns RUNNING while waiting.
 
 
 ## Actions
