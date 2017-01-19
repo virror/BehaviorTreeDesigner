@@ -33,7 +33,7 @@ Here is a complete list of all the included nodes and a short description.
 * Repeater:
   > Repeats the child node n times always returning after one tick.  
   	Returns RUNNING during the ticks its repeating, after its done, it returns  
-	last childs result.
+	last child’s result.
 
 * Wait:
   > Waits a certain number of seconds until the child is allowed to run.
@@ -53,5 +53,5 @@ Here is a complete list of all the included nodes and a short description.
 
 * WalkToTarget:
   > Sets the agents Nav Mesh position to Target, returns RUNNING while walking,  
-    SUCCESS when clorer than the specified distance and FAILURE if path could  
+    SUCCESS when closer than the specified distance and FAILURE if path could  
 	not be found.
