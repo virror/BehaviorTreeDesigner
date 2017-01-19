@@ -9,6 +9,7 @@ namespace BehavorTreeDesigner
     [Node(true, "Behavior/Base Node")]
     public abstract class BaseBehaviorNode : Node
     {
+        [SerializeField]
         protected string Id;
         [SerializeField]
         protected Texture tex;
