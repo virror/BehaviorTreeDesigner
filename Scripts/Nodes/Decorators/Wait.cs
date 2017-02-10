@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using NodeEditorFramework;
 
@@ -17,7 +16,7 @@ namespace BehavorTreeDesigner
 			Wait node = CreateInstance<Wait>();
 			base.Init(node);
 
-			node.rect = new Rect(pos.x, pos.y, 100, 100);
+			node.rect = new Rect(pos.x, pos.y, 100, 80);
 			node.CreateInput("In", "Behave", NodeSide.Top, 50);
 			node.CreateOutput("Out", "Behave", NodeSide.Bottom, 50);
 
@@ -26,7 +25,6 @@ namespace BehavorTreeDesigner
 
 		protected override void NodeGUI()
 		{
-			base.NodeGUI();
 			GUILayout.Label("Wait time(s): ");
 			waitTime = EditorGUILayout.FloatField(waitTime, GUILayout.Width(50));
 		}
@@ -34,7 +32,7 @@ namespace BehavorTreeDesigner
 		public override void Init(BehaviorBlackboard data)
 		{
 			base.Init(data);
-			data.AddFloat(guid.ToString(), 0);
+			data.Add(guid.ToString(), 0);
 		}
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
@@ -49,10 +47,10 @@ namespace BehavorTreeDesigner
 			
 			if(start)
 			{
-				data.AddFloat(guid.ToString(), Time.time);
+				data.Add(guid.ToString(), Time.time);
 			}
 
-			float time = data.GetFloat(guid.ToString());
+			float time = (float)data.Get(guid.ToString());
 
 			if(time + waitTime > Time.time)
 			{

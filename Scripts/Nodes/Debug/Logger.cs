@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using NodeEditorFramework;
 
 namespace BehavorTreeDesigner
@@ -7,8 +6,6 @@ namespace BehavorTreeDesigner
 	[Node(false, "Behavior/Debug/Logger")]
 	public class Logger : BaseBehaviorNode 
 	{
-		private string[] classes;
-
 		public override Node Create(Vector2 pos)
 		{
 			Logger node = CreateInstance<Logger>();

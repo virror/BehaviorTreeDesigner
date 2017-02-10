@@ -71,54 +71,30 @@ The behavior tree first checks if the player has a target, if not, a target is a
 
 ### Blackboard
 
-The blackboard is a place for the tree to store values between ticks and/or nodes. One example is the Wait
+The blackboard is a place for the tree to store Entries (values) between ticks and/or nodes. One example is the Wait
 node that uses the Blackboard to keep its time between ticks, and another example for use is holding the agents
 target so it can be used by multiple nodes and also to store the agent itself. The Blackboard can store pretty 
-much any kind of values like int, float, Transforms, GameObjects and much more, and are always referenced with 
+much any kind of Entry like int, float, Transforms, GameObjects and much more, and are always referenced with 
 a string value, like "Target" for keeping track of the agents target. The Blackboard can be accessed from the Init
 and Tick functions in each node using the "data" variable passed in to it. The following functions are available
 to read and write values to the Blackboard, note that the values using these functions can only be accessed within
 the same tree:
 
-* void AddClass<T>(string key, T obj):
+* void Add(string key, object obj):
   > Writes any class type of object to the blackboard, such as strings, Arrays, Unity classes and much more.
-    Example: data.AddClass<Transform>("Target", myTarget);
+    Example: data.Add("Target", myTarget);
 
-* T GetClass<T>(string key):
+* object Get(string key):
   > Reads any class type of object from the blackboard, such as strings, Arrays, Unity classes and much more.
-    Example: Transform target = data.GetClass<Transform>("Target");
+    Example: Transform target = (Transform)data.Get("Target");
 
-* void AddInt(string key, int obj):
-  > Writes an int to the blackboard.
-    Example: data.AddInt("SomeValue", 23);
-
-* void int GetInt(string key):
-  > Reads an int from the blackboard.
-    Example: int value = data.GetInt("SomeValue");
-
-* void AddFloat(string key, float obj):
-  > Writes a float to the blackboard.
-    Example: data.AddFloat("SomeValue", 23.5f);
-
-* void float GetFloat(string key):
-  > Reads a float from the blackboard.
-    Example: float value = data.GetFloat("SomeValue");
-
-* void AddBool(string key, bool obj):
-  > Writes an int to the blackboard.
-    Example: data.AddBool("SomeValue", true);
-
-* void bool GetBool(string key):
-  > Reads a bool from the blackboard.
-    Example: bool value = data.GetBool("SomeValue");
-
-You can also use the Blackboard to store global values that can be shared between trees. Some caution has to be taken 
+You can also use the Blackboard to store global Entries that can be shared between trees. Some caution has to be taken 
 when using this function and its recommended to have only one tree responsible to writing to the global Blackboard while
 any can read from it because several trees can have a different view of the world and you will end up getting hard to 
 predict results. But the global Blackboard can be very useful to share world states that needs to be accessed by all 
 agents in the game. The syntax is similar to the one above, and supports exactly the same types. The only difference
-is that you call "GetGlobalType" or AddGlobalType" instead.  
+is that you call "GetGlobal" or AddGlobal" instead.  
 Example:
-* void AddGlobalFloat(string key, float obj):
+* void AddGlobal(string key, float obj):
   > Writes a float to the global blackboard.
-    Example: data.AddFloat("SomeValue", 23.5f);
+    Example: data.AddGlobal("SomeValue", 23.5f);

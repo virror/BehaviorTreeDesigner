@@ -20,11 +20,13 @@ Here is a complete list of all the included nodes and a short description.
 
 ## Debug
 * FixedValue:
-  > Returns the selected value always.
+  > Always returns the selected value.
 
 * Logger:
   > Logs name and result of child node.
 
+* ReadEntry:
+  > Logs the content of the selected Blackboard Entry.
 
 ## Decorators
 * Inverter:
@@ -33,25 +35,29 @@ Here is a complete list of all the included nodes and a short description.
 * Repeater:
   > Repeats the child node n times always returning after one tick.  
   	Returns RUNNING during the ticks its repeating, after its done, it returns  
-	last child’s result.
+	  last child’s result.
 
 * Wait:
   > Waits a certain number of seconds until the child is allowed to run.
     Returns RUNNING while waiting.
 
-
 ## Actions
-* ClearTarget:
-  > Clears the current Target of the agent.
+* SetEntry:
+  > Sets an Entry. Class entries can only be set to null.
 
-* HasTarget:
-  > Returns SUCCESS if agent has Target, FAILURE if not.
+* HasEntry:
+  > Returns SUCCESS if Entry matches the Value, FAILURE if not.  
+    Class entries can only match to "not null".
 
-* TagToTarget:
-  > Finds the closest Target with the selected Tag and returns SUCCESS, if no  
-    Target was found it returns FAILURE.
+* TagToEntry:
+  > Finds the closest Transform with the selected Tag and returns SUCCESS, if no  
+    Transform was found it returns FAILURE.
+
+* LayerToEntry:
+  > Finds the closest Transform with the selected Layer and returns SUCCESS, if no  
+    Transform was found it returns FAILURE.
 
 * WalkToTarget:
-  > Sets the agents Nav Mesh position to Target, returns RUNNING while walking,  
+  > Sets the agents Nav Mesh position to the selected Entry, returns RUNNING while walking,  
     SUCCESS when closer than the specified distance and FAILURE if path could  
-	not be found.
+	  not be found. NOTE that the Entry must be a Transform.

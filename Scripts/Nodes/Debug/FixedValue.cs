@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using NodeEditorFramework;
-using System.Collections;
 
 namespace BehavorTreeDesigner
 {
@@ -24,7 +23,6 @@ namespace BehavorTreeDesigner
 
 		protected override void NodeGUI()
 		{
-			base.NodeGUI();
 			nodeStatus = (NodeStatus)EditorGUILayout.EnumPopup(nodeStatus);
 		}
 

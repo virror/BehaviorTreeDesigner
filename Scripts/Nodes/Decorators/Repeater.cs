@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using NodeEditorFramework;
 
@@ -16,7 +15,7 @@ namespace BehavorTreeDesigner
 			Repeater node = CreateInstance<Repeater>();
 			base.Init(node);
 
-			node.rect = new Rect(pos.x, pos.y, 100, 100);
+			node.rect = new Rect(pos.x, pos.y, 100, 95);
 			node.CreateInput("In", "Behave", NodeSide.Top, 50);
 			node.CreateOutput("Out", "Behave", NodeSide.Bottom, 50);
 
@@ -35,7 +34,7 @@ namespace BehavorTreeDesigner
 		public override void Init(BehaviorBlackboard data)
 		{
 			base.Init(data);
-			data.AddInt(guid.ToString(), 0);
+			data.Add(guid.ToString(), 0);
 		}
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
@@ -48,7 +47,7 @@ namespace BehavorTreeDesigner
 
 			BaseBehaviorNode node = (BaseBehaviorNode)this.Outputs[0].connections[0].body;
 			NodeStatus status = NodeStatus.SUCCESS;
-			int rep = data.GetInt(guid.ToString());
+			int rep = (int)data.Get(guid.ToString());
 			
 			status = node.Tick(data);
 
@@ -62,11 +61,11 @@ namespace BehavorTreeDesigner
 			if(rep < repNumber)
 			{
 				status = NodeStatus.RUNNING;
-				data.AddInt(guid.ToString(), rep);
+				data.Add(guid.ToString(), rep);
 			}
 			else
 			{
-				data.AddInt(guid.ToString(), 0);
+				data.Add(guid.ToString(), 0);
 			}
 
 			return status;

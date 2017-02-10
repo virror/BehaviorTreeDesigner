@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using NodeEditorFramework;
 
 namespace BehavorTreeDesigner
 {
@@ -26,7 +25,7 @@ namespace BehavorTreeDesigner
 			}
 
 			data = new BehaviorBlackboard();
-			data.AddClass<Transform>("Agent", agent);
+			data.Add("Agent", agent);
 			rootNode = behaviorTree.GetRootNode();
 			rootNode.Init(data);
 			InvokeRepeating("DoTick", 0, tickTime);

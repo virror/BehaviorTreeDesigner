@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using NodeEditorFramework;
 
 namespace BehavorTreeDesigner
@@ -57,6 +56,14 @@ namespace BehavorTreeDesigner
         FAILURE,
         RUNNING,
         ERROR
+    }
+
+    public enum EntryType
+    {
+        CLASS,
+        BOOL,
+        INTEGER,
+        FLOAT
     }
 
     public class BehaveType : IConnectionTypeDeclaration

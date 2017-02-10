@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using NodeEditorFramework;
-using System.Collections;
 
 namespace BehavorTreeDesigner.Example
 {
@@ -28,7 +27,7 @@ namespace BehavorTreeDesigner.Example
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
-			Transform agent = data.GetClass<Transform>("Agent");
+			Transform agent = (Transform)data.Get("Agent");
 			GameObject.Instantiate(bullet, agent.position + new Vector3(0, 1, 0), agent.rotation);
 			return NodeStatus.SUCCESS;
 		}

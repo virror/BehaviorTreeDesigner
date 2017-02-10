@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using NodeEditorFramework;
-using System.Collections;
 
 namespace BehavorTreeDesigner
 {
