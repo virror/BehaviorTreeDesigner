@@ -44,13 +44,16 @@ All nodes currently included and their description can be found here:
 
 There is one example scene set up that shows a very basic ai in action.
 It can be found in BehaviorTreeDesigner\Examples\Scenes\ and the behavior tree for it can be found in
-BehaviorTreeDesigner\Examples\Resources\aiExample.asset. The scene is set up with one agent running 
+BehaviorTreeDesigner\Examples\BehaviorTrees\Agent.asset. The scene is set up with one agent running 
 around shooting down the evil blue balls. The balls are tagged "Enemy" and the agent is setup with a 
 "Nav Mesh Agent" for pathfinding and a simple script for controlling the animations.
 
 The behavior tree first checks if the player has a target, if not, a target is assigned based on tag 
 "Enemy" and the distance. Then the agent will start walking towards the target until it’s in range, shoot 
 3 times and then clear its target. The cycle then repeats itself until no more targets can be found.
+
+The enemies have a much simpler setup. When the Agent triggers its proximity collider, it responds 
+by starting to move towards him.
 
 ## Custom nodes
 ### General

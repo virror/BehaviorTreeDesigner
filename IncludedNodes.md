@@ -38,7 +38,7 @@ Here is a complete list of all the included nodes and a short description.
 	  last child’s result.
 
 * Wait:
-  > Waits a certain number of seconds until the child is allowed to run.
+  > Waits a certain number of seconds until the child is allowed to run.  
     Returns RUNNING while waiting.
 
 ## Actions
@@ -57,7 +57,12 @@ Here is a complete list of all the included nodes and a short description.
   > Finds the closest Transform with the selected Layer and returns SUCCESS, if no  
     Transform was found it returns FAILURE.
 
+* TriggerToEntry:
+  > When the named GameObject triggers the collider, the parent objects Transform is  
+    set as the Entry. NOTE: This requires a child GameObject to be set up, with a  
+    trigger Collider and a RigidBody. The child also requires the ColliderHelper script.
+
 * WalkToTarget:
   > Sets the agents Nav Mesh position to the selected Entry, returns RUNNING while walking,  
-    SUCCESS when closer than the specified distance and FAILURE if path could  
-	  not be found. NOTE that the Entry must be a Transform.
+    SUCCESS when closer than the specified distance and FAILURE if path could not be found.  
+    NOTE that the Entry must be a Transform.
