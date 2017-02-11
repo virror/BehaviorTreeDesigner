@@ -32,7 +32,7 @@ namespace BehavorTreeDesigner
 		public override void Init(BehaviorBlackboard data)
 		{
 			base.Init(data);
-			data.Add(guid.ToString(), 0);
+			data.Add(guid.ToString(), 0.0f);
 		}
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
