@@ -38,6 +38,7 @@ namespace BehavorTreeDesigner
 
 			if(count == 0)
 			{
+				Debug.LogError("Behavor Tree Designer\nNo output node is connected on node: " + this.name);
 				return NodeStatus.ERROR;
 			}
 

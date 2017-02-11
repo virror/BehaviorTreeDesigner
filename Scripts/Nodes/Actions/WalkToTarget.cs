@@ -13,7 +13,7 @@ namespace BehavorTreeDesigner
 		[SerializeField]
 		private string entry = "";
 		[SerializeField]
-		private int stopDist = 0;
+		private float stopDist = 0;
 
 		public override Node Create(Vector2 pos)
 		{
@@ -31,7 +31,7 @@ namespace BehavorTreeDesigner
 			GUILayout.Label("Entry:");
 			entry = EditorGUILayout.TextField(entry);
 			GUILayout.Label("Stop distance:");
-			stopDist = EditorGUILayout.IntField(stopDist, GUILayout.Width(40));
+			stopDist = EditorGUILayout.FloatField(stopDist, GUILayout.Width(40));
 		}
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
@@ -40,6 +40,13 @@ namespace BehavorTreeDesigner
 			Vector3 target = ((Transform)data.Get(entry)).position;
 			NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
 			Vector3 playerPos = player.position;
+
+			if(agent == null)
+			{
+				Debug.LogError("Behavor Tree Designer\nNo NavMeshAgent component found on node: " + this.name);
+				return NodeStatus.ERROR;
+			}
+
 			agent.stoppingDistance = stopDist;
 			target.y = 0;
 			playerPos.y = 0;
