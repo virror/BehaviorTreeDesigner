@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BehaviorTreeDesigner", "Assembly-CSharp.csproj", "{FCAF9FEC-F926-DF21-1322-A2CD4BF8AA42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BehaviorTreeDesigner", "Assembly-CSharp-Editor.csproj", "{561A2FD7-F579-6A38-ACD0-8503F36FC28F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FCAF9FEC-F926-DF21-1322-A2CD4BF8AA42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCAF9FEC-F926-DF21-1322-A2CD4BF8AA42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCAF9FEC-F926-DF21-1322-A2CD4BF8AA42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCAF9FEC-F926-DF21-1322-A2CD4BF8AA42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{561A2FD7-F579-6A38-ACD0-8503F36FC28F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{561A2FD7-F579-6A38-ACD0-8503F36FC28F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{561A2FD7-F579-6A38-ACD0-8503F36FC28F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{561A2FD7-F579-6A38-ACD0-8503F36FC28F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal

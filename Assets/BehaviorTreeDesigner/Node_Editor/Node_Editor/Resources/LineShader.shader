@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Hidden/LineShader" 
 {
 SubShader 
@@ -25,7 +27,7 @@ SubShader
 		v2f vert (float2 texcoord : TEXCOORD0, float4 vertex : POSITION)
 		{
 			v2f o;
-			o.vertex = mul(UNITY_MATRIX_MVP, vertex);
+			o.vertex = UnityObjectToClipPos(vertex);
 			o.texcoord = texcoord;
 			return o;
 		}
