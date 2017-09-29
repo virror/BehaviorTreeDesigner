@@ -37,7 +37,7 @@ namespace BehavorTreeDesigner
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
 			Transform player = (Transform)data.Get("Agent");
-			Vector3 target = ((Transform)data.Get(entry)).position;
+			Transform target = ((Transform)data.Get(entry));
 			NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
 			Vector3 playerPos = player.position;
 
@@ -47,11 +47,17 @@ namespace BehavorTreeDesigner
 				return NodeStatus.ERROR;
 			}
 
+			if(target == null)
+			{
+				return NodeStatus.ERROR;
+			}
+
+			Vector3 targetPos = target.position;
 			agent.stoppingDistance = stopDist;
-			target.y = 0;
+			targetPos.y = 0;
 			playerPos.y = 0;
-			agent.destination = target;
-			if(Vector3.Distance(target, playerPos) < stopDist)
+			agent.destination = targetPos;
+			if(Vector3.Distance(targetPos, playerPos) < stopDist)
 			{
 				return NodeStatus.SUCCESS;
 			}
