@@ -7,8 +7,8 @@ using NodeEditorFramework;
 
 namespace BehavorTreeDesigner
 {
-	[Node(false, "Behavior/Action/WalkToTarget")]
-	public class WalkToTarget : BaseBehaviorNode
+	[Node(false, "Behavior/Action/MoveToTarget")]
+	public class MoveToTarget : BaseBehaviorNode
 	{
 		[SerializeField]
 		private string entry = "";
@@ -17,7 +17,7 @@ namespace BehavorTreeDesigner
 
 		public override Node Create(Vector2 pos)
 		{
-			WalkToTarget node = CreateInstance<WalkToTarget>();
+			MoveToTarget node = CreateInstance<MoveToTarget>();
 			base.Init(node);
 
 			node.rect = new Rect(pos.x, pos.y, 100, 95);
