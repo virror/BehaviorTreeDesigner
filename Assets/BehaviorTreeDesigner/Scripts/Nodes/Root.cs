@@ -26,7 +26,14 @@ namespace BehavorTreeDesigner
 			}
 
 			BaseBehaviorNode node = (BaseBehaviorNode)this.Outputs[0].connections[0].body;
-			return node.Tick(data);
+			NodeStatus status = node.Tick(data);
+
+			if(status == NodeStatus.ERROR)
+			{
+				Debug.Log("Behavor Tree Designer\nError status returned.");
+			}
+
+			return status;
 		}
 	}
 }
