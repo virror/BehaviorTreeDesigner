@@ -43,7 +43,7 @@ namespace NodeEditorFramework.Standard
 		/// <summary>
 		/// Opens the Node Editor window and loads the last session
 		/// </summary>
-		[MenuItem("Window/Node Editor")]
+		[MenuItem("Window/Behavior Tree Designer/Node Editor")]
 		public static NodeEditorWindow OpenNodeEditor () 
 		{
 			_editor = GetWindow<NodeEditorWindow>();
