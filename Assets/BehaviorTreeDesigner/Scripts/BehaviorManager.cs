@@ -25,7 +25,7 @@ namespace BehavorTreeDesigner
 			}
 
 			data = new BehaviorBlackboard();
-			data.Add("Agent", agent);
+			data.Add("_BTD_Agent", agent);
 			rootNode = behaviorTree.GetRootNode();
 			rootNode.Init(data);
 			InvokeRepeating("DoTick", 0, tickTime);

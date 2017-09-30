@@ -36,7 +36,7 @@ namespace BehavorTreeDesigner
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
-			Transform player = (Transform)data.Get("Agent");
+			Transform player = (Transform)data.Get("_BTD_Agent");
 			Transform target = ((Transform)data.Get(entry));
 			NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
 			Vector3 playerPos = player.position;

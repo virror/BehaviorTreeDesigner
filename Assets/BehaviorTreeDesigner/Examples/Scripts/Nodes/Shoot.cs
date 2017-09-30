@@ -27,7 +27,7 @@ namespace BehavorTreeDesigner.Example
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
-			Transform agent = (Transform)data.Get("Agent");
+			Transform agent = (Transform)data.Get("_BTD_Agent");
 			GameObject.Instantiate(bullet, agent.position + new Vector3(0, 1, 0), agent.rotation);
 			return NodeStatus.SUCCESS;
 		}

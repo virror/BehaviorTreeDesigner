@@ -33,7 +33,7 @@ namespace BehavorTreeDesigner
 
 		public override NodeStatus Tick(BehaviorBlackboard data)
 		{
-			Transform agent = (Transform)data.Get("Agent");
+			Transform agent = (Transform)data.Get("_BTD_Agent");
 			Transform child = agent.Find(childName);
 			
 			if(child != null)

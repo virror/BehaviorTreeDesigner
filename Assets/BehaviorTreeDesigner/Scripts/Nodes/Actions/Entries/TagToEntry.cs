@@ -43,7 +43,7 @@ namespace BehavorTreeDesigner
 				return NodeStatus.FAILURE;
 			}
 
-			agent = (Transform)data.Get("Agent");
+			agent = (Transform)data.Get("_BTD_Agent");
 			minDist = Vector3.Distance(agent.position, objects[0].transform.position);
 			closest = objects[0].transform;
 
