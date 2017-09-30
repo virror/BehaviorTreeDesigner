@@ -18,7 +18,7 @@ namespace BehavorTreeDesigner
 			base.Init(node);
 
 			node.rect = new Rect(pos.x, pos.y, 120, 95);
-			node.CreateInput("In", "Behave", NodeSide.Top, 50);
+			node.CreateInput("In", "Behave", NodeSide.Top, 60);
 
 			return node;
 		}

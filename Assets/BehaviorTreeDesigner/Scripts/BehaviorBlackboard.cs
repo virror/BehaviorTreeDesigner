@@ -5,7 +5,6 @@ namespace BehavorTreeDesigner
 	public class BehaviorBlackboard
 	{
 		public Dictionary<string, object> blackboard;
-
 		public static Dictionary<string, object> globalBlackboard;
 
 		public BehaviorBlackboard()
