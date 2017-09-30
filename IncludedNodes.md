@@ -1,6 +1,16 @@
 # Included nodes
 Here is a complete list of all the included nodes and a short description.
 
+## Base nodes
+* Root:
+  > The base node of a tree. Must always be included for a tree to be valid.
+    Does not return anything since it does not have any inputs.
+
+* Subtree:
+  > Runs another tree as a subtree to this tree. Very useful for splitting up
+    more complex trees into more managable parts.
+    Returns whatever the subtree returns.
+
 ## Composites
 
 * Selector:
@@ -19,6 +29,7 @@ Here is a complete list of all the included nodes and a short description.
   > Runs one random node and returns it status.
 
 ## Debug
+
 * FixedValue:
   > Always returns the selected value.
 
@@ -29,6 +40,7 @@ Here is a complete list of all the included nodes and a short description.
   > Logs the content of the selected Blackboard Entry.
 
 ## Decorators
+
 * Inverter:
   > Inverts the return value of the child if that value is SUCCESS or FAILURE.
 
@@ -42,6 +54,7 @@ Here is a complete list of all the included nodes and a short description.
     Returns RUNNING while waiting.
 
 ## Actions
+
 * SetEntry:
   > Sets an Entry. Class entries can only be set to null.
 
@@ -66,3 +79,7 @@ Here is a complete list of all the included nodes and a short description.
   > Sets the agents Nav Mesh position to the selected Entry, returns RUNNING while walking,  
     SUCCESS when closer than the specified distance and FAILURE if path could not be found.  
     NOTE that the Entry must be a Transform.
+
+* GetNextWaypoint:
+  > Gets a new waypoint from the waypoint system and adds it to the specified Entry.
+    Returns SUCCESS when i new waypoint was found, otherwise FAILURE.
