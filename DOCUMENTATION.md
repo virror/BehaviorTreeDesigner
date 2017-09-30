@@ -75,8 +75,8 @@ by starting to move towards him.
 ### Blackboard
 
 The blackboard is a place for the tree to store Entries (values) between ticks and/or nodes. One example is the Wait
-node that uses the Blackboard to keep its time between ticks, and another example for use is holding the agents
-target so it can be used by multiple nodes and also to store the agent itself. The Blackboard can store pretty 
+node that uses the Blackboard to keep its time between ticks, and another example of use is holding the agents
+target, so it can be used by multiple nodes and also to store the agent itself. The Blackboard can store pretty 
 much any kind of Entry like int, float, Transforms, GameObjects and much more, and are always referenced with 
 a string value, like "Target" for keeping track of the agents target. The Blackboard can be accessed from the Init
 and Tick functions in each node using the "data" variable passed in to it. The following functions are available
@@ -96,7 +96,7 @@ when using this function and its recommended to have only one tree responsible t
 any can read from it because several trees can have a different view of the world and you will end up getting hard to 
 predict results. But the global Blackboard can be very useful to share world states that needs to be accessed by all 
 agents in the game. The syntax is similar to the one above, and supports exactly the same types. The only difference
-is that you call "GetGlobal" or AddGlobal" instead.  
+is that you call "GetGlobal" or "AddGlobal" instead.  
 Example:
 * void AddGlobal(string key, float obj):
   > Writes a float to the global blackboard.

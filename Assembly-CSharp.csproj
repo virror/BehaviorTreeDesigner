@@ -86,7 +86,8 @@
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Entries\SetEntry.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Entries\TagToEntry.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Entries\TriggerToEntry.cs" />
-     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\WalkToTarget.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\GetNextWaypoint.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\MoveToTarget.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\BaseBehaviorNode.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Composites\Parallel.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Composites\Random.cs" />
@@ -99,6 +100,10 @@
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Decorators\Repeater.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Decorators\Wait.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Root.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Subtree.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Waypoint\SetWaypoint.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Waypoint\Waypoint.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Waypoint\Waypoints.cs" />
      <None Include="Assets\BehaviorTreeDesigner\Node_Editor\Node_Editor\Utilities\link.xml" />
      <None Include="Assets\BehaviorTreeDesigner\Node_Editor\Node_Editor\Resources\LineShader.shader" />
  <Reference Include="UnityEngine.UI">

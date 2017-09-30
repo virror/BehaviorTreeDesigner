@@ -47,6 +47,8 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\BehaviorTreeDesigner\Node_Editor\Editor\Node_Editor\NodeEditorWindow.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Waypoint\Editor\PlaceWaypoints.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Waypoint\Editor\WaypointsEditor.cs" />
      <None Include="Assets\BehaviorTreeDesigner\Node_Editor\Node_Editor\Utilities\link.xml" />
      <None Include="Assets\BehaviorTreeDesigner\Node_Editor\Node_Editor\Resources\LineShader.shader" />
  <Reference Include="UnityEditor.Advertisements">

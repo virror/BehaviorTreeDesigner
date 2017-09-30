@@ -7,11 +7,12 @@ namespace BehavorTreeDesigner
 		public BehaviorCanvas behaviorTree;
 		public float tickTime = 0.5f;
 		public Transform agent;
+		[HideInInspector]
+		public BehaviorBlackboard data;
 
 		private BaseBehaviorNode rootNode;
-		private BehaviorBlackboard data;
 
-		private void Start ()
+		private void Awake()
 		{
 			if(behaviorTree == null)
 			{
