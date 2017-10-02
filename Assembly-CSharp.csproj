@@ -101,6 +101,7 @@
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Decorators\Wait.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Root.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Subtree.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Template.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Waypoint\SetWaypoint.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Waypoint\Waypoint.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Waypoint\Waypoints.cs" />
