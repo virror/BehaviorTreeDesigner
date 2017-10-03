@@ -3,3 +3,7 @@
 /Node_Editor/Editor/Node_Editor/LastSession.asset.meta
 Library
 Temp
+Assembly-CSharp.csproj
+Assembly-CSharp-Editor.csproj
+BehaviorTreeDesigner.sln
+obj

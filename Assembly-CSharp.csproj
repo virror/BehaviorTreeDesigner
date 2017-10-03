@@ -81,6 +81,10 @@
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\BehaviorCanvas.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\BehaviorManager.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\ColliderHelper.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Animation\SetBool.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Animation\SetFloat.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Animation\SetInteger.cs" />
+     <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Animation\SetTrigger.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Entries\HasEntry.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Entries\LayerToEntry.cs" />
      <Compile Include="Assets\BehaviorTreeDesigner\Scripts\Nodes\Actions\Entries\SetEntry.cs" />

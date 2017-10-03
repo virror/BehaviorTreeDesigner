@@ -1,6 +1,14 @@
 # Included nodes
 Here is a complete list of all the included nodes and a short description.
 
+* [Base nodes](#base-nodes)
+* [Composites](#composites)
+* [Debyg](#debug)
+* [Decorators](#decorators)
+* [Actions](#actions)
+  * [Entries](#entries)
+  * [Animation](#animation)
+
 ## Base nodes
 * Root:
   > The base node of a tree. Must always be included for a tree to be valid.
@@ -55,6 +63,17 @@ Here is a complete list of all the included nodes and a short description.
 
 ## Actions
 
+* WalkToTarget:
+  > Sets the agents Nav Mesh position to the selected Entry, returns RUNNING while walking,  
+    SUCCESS when closer than the specified distance and FAILURE if path could not be found.  
+    NOTE that the Entry must be a Transform.
+
+* GetNextWaypoint:
+  > Gets a new waypoint from the waypoint system and adds it to the specified Entry.
+    Returns SUCCESS when i new waypoint was found, otherwise FAILURE.
+
+### Entries
+
 * SetEntry:
   > Sets an Entry. Class entries can only be set to null.
 
@@ -75,11 +94,16 @@ Here is a complete list of all the included nodes and a short description.
     set as the Entry. NOTE: This requires a child GameObject to be set up, with a  
     trigger Collider and a RigidBody. The child also requires the ColliderHelper script.
 
-* WalkToTarget:
-  > Sets the agents Nav Mesh position to the selected Entry, returns RUNNING while walking,  
-    SUCCESS when closer than the specified distance and FAILURE if path could not be found.  
-    NOTE that the Entry must be a Transform.
+### Animation
 
-* GetNextWaypoint:
-  > Gets a new waypoint from the waypoint system and adds it to the specified Entry.
-    Returns SUCCESS when i new waypoint was found, otherwise FAILURE.
+* SetBool:
+  > Sets a bool parameter on the animator.
+
+* SetTrigger:
+  > Sets a trigger parameter on the animator.
+
+* SetInteger:
+  > Sets a integer parameter on the animator.
+
+* SetFloat:
+  > Sets a float parameter on the animator.
