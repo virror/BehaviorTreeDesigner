@@ -54,8 +54,6 @@ namespace BehavorTreeDesigner
 
 			Vector3 targetPos = target.position;
 			agent.stoppingDistance = stopDist;
-			targetPos.y = 0;
-			playerPos.y = 0;
 			agent.destination = targetPos;
 			if(Vector3.Distance(targetPos, playerPos) < stopDist)
 			{
